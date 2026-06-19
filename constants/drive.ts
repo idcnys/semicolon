@@ -1,7 +1,7 @@
 import { RootFolder } from '../types/drive';
 
-export const API_KEY = process.env.EXPO_PUBLIC_DRIVE_ID_API_KEY;
-export const DRIVE_IDS_URL = process.env.EXPO_PUBLIC_DB_URL;
+export const API_KEY = "AIzaSyBFlCCVSdun8DZW1bvQpRZ3bhbTodf0Z7w";
+export const DRIVE_IDS_URL = "https://semicolondriveidapi-default-rtdb.europe-west1.firebasedatabase.app/driveIds.json";
 
 // Function to fetch root folders dynamically
 export const ROOT_FOLDERS = async (): Promise<RootFolder[]> => {

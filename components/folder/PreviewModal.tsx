@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { getFileType } from '../../scripts/fileHelpers';
 import { getResponsiveHTML } from '../../scripts/htmlGenerators';
@@ -37,67 +38,73 @@ export const PreviewModal: React.FC<Props> = ({
 
     return (
         <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
-            <View style={styles.modalContainer}>
-                <View style={styles.modalDragIndicator} />
-                <View style={styles.modalHeader}>
-                    <View style={styles.titleWrapper}>
-                        <Text style={styles.modalTitle} numberOfLines={1}>{item.name}</Text>
-                        <Text style={styles.modalSubtitle}>{fileType.toUpperCase()} Asset Resource</Text>
-                    </View>
-                    <View style={styles.modalHeaderActions}>
-                        <TouchableOpacity 
-                            onPress={() => onBookmarkToggle(item)} 
-                            style={styles.modalBookmarkButton}
-                        >
-                            <Bookmark 
-                                size={24} 
-                                color={isBookmarked ? "#4285F4" : "#9aa0a6"}
-                                fill={isBookmarked ? "#4285F4" : "none"}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
-                            <Text style={styles.closeButtonText}>✕</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.previewContainer}>
-                    {item.id ? (
-                        <WebView
-                            source={{ html: getResponsiveHTML(item.id, fileType) }}
-                            style={styles.webView}
-                            startInLoadingState={true}
-                            renderLoading={() => (
-                                <View style={styles.webViewLoading}>
-                                    <ActivityIndicator size="large" color="#4285F4" />
-                                    <Text style={styles.loadingSubtext}>
-                                        {fileType === 'pdf' ? 'Loading PDF...' : 'Optimizing file layout...'}
-                                    </Text>
-                                </View>
-                            )}
-                            onError={() => {
-                                Alert.alert('Preview Error', 'Could not load resource. Open via browser?', [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    { text: 'Open Browser', onPress: () => WebBrowser.openBrowserAsync(`https://drive.google.com/file/d/${item.id}/view`) }
-                                ]);
-                            }}
-                            javaScriptEnabled 
-                            domStorageEnabled 
-                            scalesPageToFit 
-                            mixedContentMode="always" 
-                            allowsFullscreenVideo
-                        />
-                    ) : (
-                        <View style={styles.centerContainer}>
-                            <Text style={styles.emptyText}>No preview available</Text>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalDragIndicator} />
+                    <View style={styles.modalHeader}>
+                        <View style={styles.titleWrapper}>
+                            <Text style={styles.modalTitle} numberOfLines={1}>{item.name}</Text>
+                            <Text style={styles.modalSubtitle}>{fileType.toUpperCase()} Asset Resource</Text>
                         </View>
-                    )}
+                        <View style={styles.modalHeaderActions}>
+                            <TouchableOpacity 
+                                onPress={() => onBookmarkToggle(item)} 
+                                style={styles.modalBookmarkButton}
+                            >
+                                <Bookmark 
+                                    size={24} 
+                                    color={isBookmarked ? "#4285F4" : "#9aa0a6"}
+                                    fill={isBookmarked ? "#4285F4" : "none"}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.previewContainer}>
+                        {item.id ? (
+                            <WebView
+                                source={{ html: getResponsiveHTML(item.id, fileType) }}
+                                style={styles.webView}
+                                startInLoadingState={true}
+                                renderLoading={() => (
+                                    <View style={styles.webViewLoading}>
+                                        <ActivityIndicator size="large" color="#4285F4" />
+                                        <Text style={styles.loadingSubtext}>
+                                            {fileType === 'pdf' ? 'Loading PDF...' : 'Optimizing file layout...'}
+                                        </Text>
+                                    </View>
+                                )}
+                                onError={() => {
+                                    Alert.alert('Preview Error', 'Could not load resource. Open via browser?', [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        { text: 'Open Browser', onPress: () => WebBrowser.openBrowserAsync(`https://drive.google.com/file/d/${item.id}/view`) }
+                                    ]);
+                                }}
+                                javaScriptEnabled 
+                                domStorageEnabled 
+                                scalesPageToFit 
+                                mixedContentMode="always" 
+                                allowsFullscreenVideo
+                            />
+                        ) : (
+                            <View style={styles.centerContainer}>
+                                <Text style={styles.emptyText}>No preview available</Text>
+                            </View>
+                        )}
+                    </View>
                 </View>
-            </View>
+            </SafeAreaView>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
     modalContainer: { 
         flex: 1, 
         backgroundColor: '#121212', 
