@@ -1,98 +1,166 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { AlertCircle, Trophy } from 'lucide-react-native';
+import React from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { ContestCard } from '../../components/contests/ContestCard';
+import { DateHeader } from '../../components/contests/DateHeader';
+import { EmptyState } from '../../components/contests/EmptyState';
+import { useContests } from '../../hooks/useContests';
+import { GroupedContests } from '../../types/contests';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
+const ContestSchedule: React.FC = () => {
+    const {
+        groupedContests,
+        loading,
+        refreshing,
+        error,
+        usingFallback,
+        onRefresh,
+    } = useContests();
+
+    const renderItem = ({ item }: { item: GroupedContests }) => (
+        <View style={styles.groupContainer}>
+            <DateHeader date={item.date} count={item.count} />
+            {item.contests.map((contest) => (
+                <ContestCard key={contest.id} contest={contest} />
+            ))}
+        </View>
+    );
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2563EB" />
+                <Text style={styles.loadingText}>Loading contests...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.titleContainer}>
+                <View style={styles.titleRow}>
+                    <Trophy size={24} color="#2563EB" />
+                    <Text style={styles.title}>Upcoming Contests</Text>
+                </View>
+                {usingFallback && (
+                    <View style={styles.fallbackBadge}>
+                        <AlertCircle size={14} color="#92400E" />
+                        <Text style={styles.fallbackBadgeText}>Demo</Text>
+                    </View>
+                )}
+            </View>
+            
+            {error && (
+                <View style={styles.errorBanner}>
+                    <AlertCircle size={16} color="#991B1B" />
+                    <Text style={styles.errorBannerText}>{error}</Text>
+                </View>
+            )}
+            
+            <FlatList
+                data={groupedContests}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.date}
+                refreshControl={
+                    <RefreshControl 
+                        refreshing={refreshing} 
+                        onRefresh={onRefresh}
+                        tintColor="#2563EB"
+                        colors={['#2563EB']}
+                    />
+                }
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={<EmptyState onRefresh={onRefresh} />}
             />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
+        </SafeAreaView>
+    );
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#F8FAFC',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#64748B',
+    },
+    titleContainer: {
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 12,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#0F172A',
+        marginLeft: 8,
+    },
+    fallbackBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FEF3C7',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        gap: 4,
+    },
+    fallbackBadgeText: {
+        color: '#92400E',
+        fontSize: 12,
+        fontWeight: '600',
+        marginLeft: 4,
+    },
+    errorBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FEE2E2',
+        padding: 12,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#FCA5A5',
+        gap: 8,
+    },
+    errorBannerText: {
+        color: '#991B1B',
+        fontSize: 14,
+        flex: 1,
+    },
+    listContent: {
+        padding: 16,
+        paddingTop: 12,
+    },
+    groupContainer: {
+        marginBottom: 20,
+    },
 });
+
+export default ContestSchedule;

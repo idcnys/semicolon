@@ -1,0 +1,232 @@
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { isFolder } from '../../scripts/driveApi';
+
+// Types
+import { DriveItem } from '../../types/drive';
+
+// Hooks
+import { useBookmarks } from '../../hooks/useBookmarks';
+import { useFolderNavigation } from '../../hooks/useFolderNavigation';
+
+// Components
+import { FolderEmptyState } from '../../components/folder/EmptyState';
+import { FolderCard } from '../../components/folder/FolderCard';
+import { FolderHeader } from '../../components/folder/FolderHeader';
+import { FolderItem } from '../../components/folder/FolderItem';
+import { PreviewModal } from '../../components/folder/PreviewModal';
+
+export default function FolderScreen() {
+    const {
+        folderStack,
+        folderNames,
+        items,
+        loading,
+        error,
+        currentFolderId,
+        rootFolders,
+        rootFoldersLoading,
+        rootFoldersError,
+        navigateToFolder,
+        navigateToRoot,
+        navigateToBreadcrumb,
+        refresh,
+        refreshRootFolders
+    } = useFolderNavigation();
+
+    const { toggleBookmark, isBookmarked } = useBookmarks();
+
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewItem, setPreviewItem] = useState<DriveItem | null>(null);
+
+    const handlePressItem = (item: DriveItem) => {
+        if (isFolder(item.mimeType)) {
+            navigateToFolder(item.id, item.name);
+        } else {
+            setPreviewItem(item);
+            setPreviewVisible(true);
+        }
+    };
+
+    const closePreview = () => {
+        setPreviewVisible(false);
+        setPreviewItem(null);
+    };
+
+    const handleBookmarkToggle = (item: DriveItem) => {
+        const currentPath = folderStack.map(id => folderNames[id] || 'Unknown');
+        toggleBookmark({
+            ...item,
+            folderPath: currentPath.length > 0 ? currentPath : ['Root']
+        });
+    };
+
+    const renderItem = ({ item }: { item: DriveItem }) => (
+        <FolderItem
+            item={item}
+            isBookmarked={isBookmarked(item.id)}
+            onPress={handlePressItem}
+            onBookmarkToggle={handleBookmarkToggle}
+        />
+    );
+
+    const getTitle = () => {
+        if (!currentFolderId) return 'Shared files';
+        return folderNames[currentFolderId] || 'Folder Explorer';
+    };
+
+    // Render loading state for root folders
+    if (rootFoldersLoading) {
+        return (
+            <SafeAreaView style={styles.safeContainer}>
+                <View style={[styles.container, styles.centerContent]}>
+                    <ActivityIndicator size="large" color="#1a73e8" />
+                    <Text style={styles.loadingText}>Loading directories...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    // Render error state for root folders
+    if (rootFoldersError) {
+        return (
+            <SafeAreaView style={styles.safeContainer}>
+                <View style={[styles.container, styles.centerContent]}>
+                    <Text style={styles.errorText}>Failed to load directories</Text>
+                    <Text style={styles.errorSubText}>{rootFoldersError}</Text>
+                    <Text 
+                        style={styles.retryText} 
+                        onPress={refreshRootFolders}
+                    >
+                        Tap to retry
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    return (
+        <SafeAreaView style={styles.safeContainer}>
+            <View style={styles.container}>
+                <FolderHeader
+                    title={getTitle()}
+                    folderStack={folderStack}
+                    folderNames={folderNames}
+                    onBreadcrumbPress={navigateToBreadcrumb}
+                />
+
+                {folderStack.length === 0 ? (
+                    <ScrollView contentContainerStyle={styles.dashboardContainer}>
+                        <Text style={styles.sectionTitle}>Select a Directory</Text>
+                        <View style={styles.cardGrid}>
+                            {rootFolders.map((folder) => (
+                                <FolderCard
+                                    key={folder.id}
+                                    folder={folder}
+                                    onPress={() => navigateToRoot(folder.id)}
+                                />
+                            ))}
+                        </View>
+                    </ScrollView>
+                ) : loading ? (
+                    <FolderEmptyState type="loading" />
+                ) : error ? (
+                    <FolderEmptyState type="error" error={error} onRetry={refresh} />
+                ) : items.length === 0 ? (
+                    <FolderEmptyState type="empty" />
+                ) : (
+                    <FlatList
+                        data={items}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        contentContainerStyle={styles.listContainer}
+                        ItemSeparatorComponent={() => <View style={styles.separator} />}
+                    />
+                )}
+
+                <PreviewModal
+                    visible={previewVisible}
+                    item={previewItem}
+                    isBookmarked={previewItem ? isBookmarked(previewItem.id) : false}
+                    onClose={closePreview}
+                    onBookmarkToggle={handleBookmarkToggle}
+                />
+            </View>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    safeContainer: { 
+        flex: 1, 
+        backgroundColor: '#f8f9fa' 
+    },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8f9fa' 
+    },
+    centerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    dashboardContainer: { 
+        padding: 16 
+    },
+    sectionTitle: { 
+        fontSize: 14, 
+        fontWeight: '700', 
+        color: '#5f6368', 
+        textTransform: 'uppercase', 
+        letterSpacing: 0.5, 
+        marginBottom: 16 
+    },
+    cardGrid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between' 
+    },
+    listContainer: { 
+        paddingHorizontal: 16, 
+        paddingVertical: 8, 
+        backgroundColor: '#fff', 
+        flexGrow: 1 
+    },
+    separator: { 
+        height: 1, 
+        backgroundColor: '#f1f3f4', 
+        marginLeft: 38 
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#5f6368',
+    },
+    errorText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#d32f2f',
+        marginBottom: 8,
+    },
+    errorSubText: {
+        fontSize: 14,
+        color: '#5f6368',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    retryText: {
+        fontSize: 16,
+        color: '#1a73e8',
+        fontWeight: '500',
+        padding: 8,
+    },
+});
