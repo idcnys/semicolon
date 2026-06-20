@@ -8,6 +8,13 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#8E8E93',
         headerShown: false,
+        // Add this to remove the top border and adjust padding
+        tabBarStyle: {
+          borderTopWidth: 0, // Removes the top border line
+          elevation: 0,      // Removes shadow on Android
+          shadowOpacity: 0,  // Removes shadow on iOS
+          backgroundColor: '#FFFFFF', // Ensure this matches your screen background
+        },
       }}
     >
       <Tabs.Screen

@@ -41,7 +41,7 @@ const ContestSchedule: React.FC = () => {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
             <View style={styles.titleContainer}>
                 <View style={styles.titleRow}>
                     <Trophy size={24} color="#2563EB" />

@@ -2,10 +2,10 @@ import { StatusBar } from 'expo-status-bar';
 import { BookOpen } from 'lucide-react-native';
 import React from 'react';
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,7 +30,7 @@ export default function CoverPageGenerator() {
     } = useCoverGenerator();
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
             <StatusBar style="auto" />
             <ScrollView style={styles.container}>
                 <View style={styles.app}>

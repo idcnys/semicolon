@@ -91,7 +91,7 @@ export default function FolderScreen() {
     // Render error state for root folders
     if (rootFoldersError) {
         return (
-            <SafeAreaView style={styles.safeContainer}>
+            <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
                 <View style={[styles.container, styles.centerContent]}>
                     <Text style={styles.errorText}>Failed to load directories</Text>
                     <Text style={styles.errorSubText}>{rootFoldersError}</Text>

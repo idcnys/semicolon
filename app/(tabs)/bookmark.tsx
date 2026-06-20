@@ -35,7 +35,7 @@ export default function BookmarksScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeContainer}>
+        <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Bookmarks</Text>
