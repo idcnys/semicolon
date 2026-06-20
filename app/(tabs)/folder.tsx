@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
     FlatList,
     ScrollView,
     StyleSheet,
@@ -22,6 +21,7 @@ import { FolderEmptyState } from '../../components/folder/EmptyState';
 import { FolderCard } from '../../components/folder/FolderCard';
 import { FolderHeader } from '../../components/folder/FolderHeader';
 import { FolderItem } from '../../components/folder/FolderItem';
+import { FolderLoadingSkeleton } from '../../components/folder/FolderLoadingSkeleton';
 import { PreviewModal } from '../../components/folder/PreviewModal';
 
 export default function FolderScreen() {
@@ -85,14 +85,7 @@ export default function FolderScreen() {
 
     // Render loading state for root folders
     if (rootFoldersLoading) {
-        return (
-            <SafeAreaView style={styles.safeContainer}>
-                <View style={[styles.container, styles.centerContent]}>
-                    <ActivityIndicator size="large" color="#1a73e8" />
-                    <Text style={styles.loadingText}>Loading directories...</Text>
-                </View>
-            </SafeAreaView>
-        );
+        return <FolderLoadingSkeleton type="dashboard" />;
     }
 
     // Render error state for root folders
@@ -137,7 +130,7 @@ export default function FolderScreen() {
                         </View>
                     </ScrollView>
                 ) : loading ? (
-                    <FolderEmptyState type="loading" />
+                    <FolderLoadingSkeleton type="list" />
                 ) : error ? (
                     <FolderEmptyState type="error" error={error} onRetry={refresh} />
                 ) : items.length === 0 ? (
@@ -205,11 +198,6 @@ const styles = StyleSheet.create({
         height: 1, 
         backgroundColor: '#f1f3f4', 
         marginLeft: 38 
-    },
-    loadingText: {
-        marginTop: 12,
-        fontSize: 16,
-        color: '#5f6368',
     },
     errorText: {
         fontSize: 18,

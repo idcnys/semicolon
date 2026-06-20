@@ -1,16 +1,16 @@
 import { AlertCircle, Trophy } from 'lucide-react-native';
 import React from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ContestCard } from '../../components/contests/ContestCard';
+import { ContestLoadingSkeleton } from '../../components/contests/ContestLoadingSkeleton';
 import { DateHeader } from '../../components/contests/DateHeader';
 import { EmptyState } from '../../components/contests/EmptyState';
 import { useContests } from '../../hooks/useContests';
@@ -36,12 +36,7 @@ const ContestSchedule: React.FC = () => {
     );
 
     if (loading) {
-        return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2563EB" />
-                <Text style={styles.loadingText}>Loading contests...</Text>
-            </SafeAreaView>
-        );
+        return <ContestLoadingSkeleton />;
     }
 
     return (
@@ -90,17 +85,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F8FAFC',
-    },
-    loadingText: {
-        marginTop: 12,
-        fontSize: 16,
-        color: '#64748B',
     },
     titleContainer: {
         paddingHorizontal: 20,

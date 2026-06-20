@@ -1,27 +1,33 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 export const TodoLoadingSkeleton: React.FC = () => {
     return (
-        <View style={styles.loadingContainer}>
-            <View style={styles.loadingHeader}>
-                <View style={styles.loadingGreeting} />
-                <View style={styles.loadingButton} />
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.loadingContainer}>
+                <View style={styles.loadingHeader}>
+                    <View style={styles.loadingGreeting} />
+                    <View style={styles.loadingButton} />
+                </View>
+                <View style={styles.loadingSearch} />
+                <View style={styles.loadingFilters} />
+                <View style={styles.loadingCards}>
+                    {[1, 2, 3].map((i) => (
+                        <View key={i} style={styles.loadingCard}>
+                            <View style={styles.loadingCardContent} />
+                        </View>
+                    ))}
+                </View>
             </View>
-            <View style={styles.loadingSearch} />
-            <View style={styles.loadingFilters} />
-            <View style={styles.loadingCards}>
-                {[1, 2, 3].map((i) => (
-                    <View key={i} style={styles.loadingCard}>
-                        <View style={styles.loadingCardContent} />
-                    </View>
-                ))}
-            </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#F8F9FA',
+    },
     loadingContainer: {
         flex: 1,
         backgroundColor: '#F8F9FA',
