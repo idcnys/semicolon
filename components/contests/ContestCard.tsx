@@ -30,6 +30,38 @@ export const ContestCard: React.FC<Props> = ({ contest }) => {
         }
     };
 
+    // Helper function to get platform color
+    const getPlatformColor = (platform: string) => {
+        const colors: { [key: string]: string } = {
+            'Codeforces': '#1F8ACB',
+            'CodeChef': '#5B4637',
+            'LeetCode': '#FFA116',
+            'AtCoder': '#222222',
+            'HackerRank': '#00EA64',
+            'HackerEarth': '#323754',
+            'TopCoder': '#0066CC',
+            'Kick Start': '#34A853',
+            default: '#64748B'
+        };
+        return colors[platform] || colors.default;
+    };
+
+    // Helper function to get platform background color (lighter version)
+    const getPlatformBgColor = (platform: string) => {
+        const colors: { [key: string]: string } = {
+            'Codeforces': '#EBF5FF',
+            'CodeChef': '#F5F0ED',
+            'LeetCode': '#FFF8ED',
+            'AtCoder': '#F0F0F0',
+            'HackerRank': '#E8FBF0',
+            'HackerEarth': '#EDEEF2',
+            'TopCoder': '#E6F0FF',
+            'Kick Start': '#EBF8F0',
+            default: '#F1F5F9'
+        };
+        return colors[platform] || colors.default;
+    };
+
     return (
         <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
             <View style={styles.card}>
@@ -70,9 +102,25 @@ export const ContestCard: React.FC<Props> = ({ contest }) => {
                     </View>
                     
                     <View style={styles.cardFooter}>
-                        <View style={styles.statusBadge}>
-                            <Zap size={12} color="#166534" />
-                            <Text style={styles.statusText}>Upcoming</Text>
+                        <View style={styles.footerTags}>
+                            {/* Status Badge */}
+                            <View style={styles.statusBadge}>
+                                <Zap size={12} color="#166534" />
+                                <Text style={styles.statusText}>Upcoming</Text>
+                            </View>
+                            
+                            {/* Platform Tag */}
+                            <View style={[
+                                styles.platformBadge,
+                                { backgroundColor: getPlatformBgColor(contest.platform || '') }
+                            ]}>
+                                <Text style={[
+                                    styles.platformText,
+                                    { color: getPlatformColor(contest.platform || '') }
+                                ]}>
+                                    {contest.platform || 'Platform'}
+                                </Text>
+                            </View>
                         </View>
                         <View style={styles.linkIcon}>
                             <ExternalLink size={16} color="#64748B" />
@@ -147,6 +195,11 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#F1F5F9',
     },
+    footerTags: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
     statusBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -161,6 +214,17 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#166534',
         marginLeft: 4,
+    },
+    platformBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+    },
+    platformText: {
+        fontSize: 12,
+        fontWeight: '500',
     },
     linkIcon: {
         padding: 4,

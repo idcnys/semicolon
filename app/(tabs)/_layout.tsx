@@ -13,7 +13,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'CF Cal',
+          title: 'CP Cal',
           tabBarIcon: ({ focused }) => (
             <Image 
               source={require('../../assets/icons/cfcal.png')} 

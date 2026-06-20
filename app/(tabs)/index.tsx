@@ -1,4 +1,4 @@
-import { AlertCircle, Trophy } from 'lucide-react-native';
+import { AlertCircle, Calendar, Trophy } from 'lucide-react-native';
 import React from 'react';
 import {
     FlatList,
@@ -23,8 +23,20 @@ const ContestSchedule: React.FC = () => {
         refreshing,
         error,
         usingFallback,
+        contestCount,
         onRefresh,
     } = useContests();
+
+    // Get current date formatted
+    const getCurrentDate = () => {
+        const now = new Date();
+        return now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    };
 
     const renderItem = ({ item }: { item: GroupedContests }) => (
         <View style={styles.groupContainer}>
@@ -46,18 +58,53 @@ const ContestSchedule: React.FC = () => {
                     <Trophy size={24} color="#2563EB" />
                     <Text style={styles.title}>Upcoming Contests</Text>
                 </View>
-                {usingFallback && (
-                    <View style={styles.fallbackBadge}>
-                        <AlertCircle size={14} color="#92400E" />
-                        <Text style={styles.fallbackBadgeText}>Demo</Text>
-                    </View>
-                )}
+                <View style={styles.headerRight}>
+                    {contestCount && contestCount.total > 0 && (
+                        <View style={styles.countBadge}>
+                            <Text style={styles.countText}>
+                                {contestCount.total}
+                            </Text>
+                        </View>
+                    )}
+                    {usingFallback && (
+                        <View style={styles.fallbackBadge}>
+                            <AlertCircle size={14} color="#92400E" />
+                            <Text style={styles.fallbackBadgeText}>Demo</Text>
+                        </View>
+                    )}
+                </View>
+            </View>
+
+            {/* Current Date Display */}
+            <View style={styles.dateContainer}>
+                <Calendar size={16} color="#64748B" />
+                <Text style={styles.dateText}>{getCurrentDate()}</Text>
             </View>
             
             {error && (
                 <View style={styles.errorBanner}>
                     <AlertCircle size={16} color="#991B1B" />
                     <Text style={styles.errorBannerText}>{error}</Text>
+                </View>
+            )}
+
+            {/* Platform stats */}
+            {contestCount && contestCount.total > 0 && (
+                <View style={styles.statsContainer}>
+                    <View style={styles.statsRow}>
+                        <View style={styles.statItem}>
+                            <View style={[styles.statDot, { backgroundColor: '#1F8ACB' }]} />
+                            <Text style={styles.statText}>Codeforces: {contestCount.codeforces}</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <View style={[styles.statDot, { backgroundColor: '#222222' }]} />
+                            <Text style={styles.statText}>AtCoder: {contestCount.atcoder}</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <View style={[styles.statDot, { backgroundColor: '#5B4638' }]} />
+                            <Text style={styles.statText}>CodeChef: {contestCount.codechef}</Text>
+                        </View>
+                    </View>
                 </View>
             )}
             
@@ -108,6 +155,24 @@ const styles = StyleSheet.create({
         color: '#0F172A',
         marginLeft: 8,
     },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    countBadge: {
+        backgroundColor: '#EFF6FF',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#BFDBFE',
+    },
+    countText: {
+        color: '#1D4ED8',
+        fontSize: 13,
+        fontWeight: '700',
+    },
     fallbackBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -122,6 +187,48 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 4,
+    },
+    dateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+        gap: 8,
+    },
+    dateText: {
+        fontSize: 14,
+        color: '#475569',
+        fontWeight: '500',
+    },
+    statsContainer: {
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+    },
+    statsRow: {
+        flexDirection: 'row',
+        gap: 16,
+        flexWrap: 'wrap',
+    },
+    statItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    statDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    statText: {
+        fontSize: 12,
+        color: '#475569',
+        fontWeight: '500',
     },
     errorBanner: {
         flexDirection: 'row',
