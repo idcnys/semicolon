@@ -75,7 +75,7 @@ export const generateCoverHTML = (state: CoverState, isPreview: boolean = false)
                 font-style: normal;
               }
               @font-face {
-                font-family: 'TimesNewRoman';
+                font-family: 'TimesNewRoman-bold';
                 src: url('${TNR_FONT_BASE64}') format('truetype');
                 font-weight: bold;
                 font-style: normal;
@@ -183,7 +183,7 @@ export const generateCoverHTML = (state: CoverState, isPreview: boolean = false)
               }
               
               b, strong {
-                font-family: 'TimesNewRoman', 'Times New Roman', Times, serif;
+                font-family: 'TimesNewRoman-bold';
                 font-weight: bold;
               }
               
@@ -282,6 +282,7 @@ export const generateCoverHTML = (state: CoverState, isPreview: boolean = false)
                   width: 48%;
                   line-height: 1.6;
                 }
+                
               }
             </style>
           </head>
