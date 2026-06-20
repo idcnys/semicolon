@@ -1,4 +1,4 @@
-import { AlertCircle, Calendar, Trophy } from 'lucide-react-native';
+import { AlertCircle, Trophy } from 'lucide-react-native';
 import React from 'react';
 import {
     FlatList,
@@ -26,17 +26,6 @@ const ContestSchedule: React.FC = () => {
         contestCount,
         onRefresh,
     } = useContests();
-
-    // Get current date formatted
-    const getCurrentDate = () => {
-        const now = new Date();
-        return now.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
 
     const renderItem = ({ item }: { item: GroupedContests }) => (
         <View style={styles.groupContainer}>
@@ -73,12 +62,6 @@ const ContestSchedule: React.FC = () => {
                         </View>
                     )}
                 </View>
-            </View>
-
-            {/* Current Date Display */}
-            <View style={styles.dateContainer}>
-                <Calendar size={16} color="#64748B" />
-                <Text style={styles.dateText}>{getCurrentDate()}</Text>
             </View>
             
             {error && (
@@ -187,21 +170,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 4,
-    },
-    dateContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F1F5F9',
-        gap: 8,
-    },
-    dateText: {
-        fontSize: 14,
-        color: '#475569',
-        fontWeight: '500',
     },
     statsContainer: {
         backgroundColor: '#FFFFFF',

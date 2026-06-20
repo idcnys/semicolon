@@ -1,4 +1,4 @@
-import { File, Home } from 'lucide-react-native';
+import { File, Home, X } from 'lucide-react-native';
 import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BookmarkItem as BookmarkType } from '../../hooks/useBookmarks';
@@ -54,7 +54,7 @@ export const BookmarkItem: React.FC<Props> = ({ item, onPress, onRemove }) => {
                     }} 
                     style={styles.removeButton}
                 >
-                    <Text style={styles.removeButtonText}>✕</Text>
+                    <X size={16} color="#5f6368" />
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>
@@ -141,11 +141,10 @@ const styles = StyleSheet.create({
         color: '#9aa0a6',
     },
     removeButton: {
-        padding: 6,
-        backgroundColor: '#f1f3f4',
-        borderRadius: 16,
         width: 28,
         height: 28,
+        borderRadius: 14,
+        backgroundColor: '#f1f3f4',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -153,5 +152,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#5f6368',
         fontWeight: '600',
+        lineHeight: 14,
+        textAlign: 'center',
     },
 });

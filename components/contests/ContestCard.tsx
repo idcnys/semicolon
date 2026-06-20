@@ -30,41 +30,44 @@ export const ContestCard: React.FC<Props> = ({ contest }) => {
         }
     };
 
-    // Helper function to get platform color
-    const getPlatformColor = (platform: string) => {
-        const colors: { [key: string]: string } = {
-            'Codeforces': '#1F8ACB',
-            'CodeChef': '#5B4637',
-            'LeetCode': '#FFA116',
-            'AtCoder': '#222222',
-            'HackerRank': '#00EA64',
-            'HackerEarth': '#323754',
-            'TopCoder': '#0066CC',
-            'Kick Start': '#34A853',
-            default: '#64748B'
-        };
-        return colors[platform] || colors.default;
+    // Check if contest has started
+    const hasStarted = contest.startsIn === '0' || contest.startsIn === 'Started';
+    
+    // Get platform color based on contest platform
+    const getPlatformColor = (platform?: string) => {
+        switch (platform?.toLowerCase()) {
+            case 'codeforces':
+                return '#1F8ACB';
+            case 'codechef':
+                return '#D0A74F';
+            case 'leetcode':
+                return '#FFA116';
+            case 'atcoder':
+                return '#222222';
+            default:
+                return '#64748B';
+        }
     };
 
-    // Helper function to get platform background color (lighter version)
-    const getPlatformBgColor = (platform: string) => {
-        const colors: { [key: string]: string } = {
-            'Codeforces': '#EBF5FF',
-            'CodeChef': '#F5F0ED',
-            'LeetCode': '#FFF8ED',
-            'AtCoder': '#F0F0F0',
-            'HackerRank': '#E8FBF0',
-            'HackerEarth': '#EDEEF2',
-            'TopCoder': '#E6F0FF',
-            'Kick Start': '#EBF8F0',
-            default: '#F1F5F9'
-        };
-        return colors[platform] || colors.default;
+    // Get platform background color
+    const getPlatformBgColor = (platform?: string) => {
+        switch (platform?.toLowerCase()) {
+            case 'codeforces':
+                return '#E8F4FD';
+            case 'codechef':
+                return '#FDF6E3';
+            case 'leetcode':
+                return '#FFF8E8';
+            case 'atcoder':
+                return '#F0F0F0';
+            default:
+                return '#F1F5F9';
+        }
     };
 
     return (
         <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
-            <View style={styles.card}>
+            <View style={[styles.card, hasStarted && styles.cardStarted]}>
                 <View style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                         <View style={styles.iconWrapper}>
@@ -85,12 +88,15 @@ export const ContestCard: React.FC<Props> = ({ contest }) => {
                         </View>
                         
                         <View style={styles.detailRow}>
-                            <View style={styles.detailItem}>
-                                <Timer size={14} color="#64748B" />
-                                <Text style={styles.detailText}>
-                                    Starts in {contest.startsIn}
-                                </Text>
-                            </View>
+                            {/* Only show "Starts in" if not started */}
+                            {!hasStarted && (
+                                <View style={styles.detailItem}>
+                                    <Timer size={14} color="#64748B" />
+                                    <Text style={styles.detailText}>
+                                        Starts in {contest.startsIn}
+                                    </Text>
+                                </View>
+                            )}
                             
                             <View style={styles.detailItem}>
                                 <Clock size={14} color="#64748B" />
@@ -102,26 +108,31 @@ export const ContestCard: React.FC<Props> = ({ contest }) => {
                     </View>
                     
                     <View style={styles.cardFooter}>
-                        <View style={styles.footerTags}>
+                        <View style={styles.tagsContainer}>
                             {/* Status Badge */}
-                            <View style={styles.statusBadge}>
-                                <Zap size={12} color="#166534" />
-                                <Text style={styles.statusText}>Upcoming</Text>
+                            <View style={[styles.statusBadge, hasStarted && styles.statusBadgeStarted]}>
+                                <Zap size={12} color={hasStarted ? "#991B1B" : "#166534"} />
+                                <Text style={[styles.statusText, hasStarted && styles.statusTextStarted]}>
+                                    {hasStarted ? 'Started' : 'Upcoming'}
+                                </Text>
                             </View>
                             
                             {/* Platform Tag */}
-                            <View style={[
-                                styles.platformBadge,
-                                { backgroundColor: getPlatformBgColor(contest.platform || '') }
-                            ]}>
-                                <Text style={[
-                                    styles.platformText,
-                                    { color: getPlatformColor(contest.platform || '') }
+                            {contest.platform && (
+                                <View style={[
+                                    styles.platformTag, 
+                                    { backgroundColor: getPlatformBgColor(contest.platform) }
                                 ]}>
-                                    {contest.platform || 'Platform'}
-                                </Text>
-                            </View>
+                                    <Text style={[
+                                        styles.platformText,
+                                        { color: getPlatformColor(contest.platform) }
+                                    ]}>
+                                        {contest.platform}
+                                    </Text>
+                                </View>
+                            )}
                         </View>
+                        
                         <View style={styles.linkIcon}>
                             <ExternalLink size={16} color="#64748B" />
                         </View>
@@ -144,6 +155,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
+    },
+    cardStarted: {
+        borderColor: '#EF4444',
+        borderWidth: 2,
+        backgroundColor: '#FEF2F2',
     },
     cardContent: {
         padding: 16,
@@ -174,9 +190,9 @@ const styles = StyleSheet.create({
     },
     detailRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         flexWrap: 'wrap',
-        gap: 8,
+        gap: 16,
     },
     detailItem: {
         flexDirection: 'row',
@@ -195,10 +211,11 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#F1F5F9',
     },
-    footerTags: {
+    tagsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        flexWrap: 'wrap',
     },
     statusBadge: {
         flexDirection: 'row',
@@ -209,22 +226,27 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         gap: 4,
     },
+    statusBadgeStarted: {
+        backgroundColor: '#FEE2E2',
+    },
     statusText: {
         fontSize: 12,
         fontWeight: '600',
         color: '#166534',
         marginLeft: 4,
     },
-    platformBadge: {
+    statusTextStarted: {
+        color: '#991B1B',
+    },
+    platformTag: {
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
     },
     platformText: {
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '600',
+        textTransform: 'capitalize',
     },
     linkIcon: {
         padding: 4,
