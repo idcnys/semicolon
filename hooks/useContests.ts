@@ -63,7 +63,7 @@ export const useContests = () => {
             const grouped = groupContestsByDate(FALLBACK_CONTESTS);
             setGroupedContests(grouped);
             setUsingFallback(true);
-            setError('Unable to fetch live data. Showing sample contests.');
+            setError('No Network Connection');
             
             setContestCount({
                 codeforces: FALLBACK_CONTESTS.filter(c => c.platform === 'Codeforces').length,

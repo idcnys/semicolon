@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bittosaha.semicolon",
+      "bundleIdentifier": "com.bitto.semicolon",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -24,7 +24,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.bittosaha.semicolon"
+      "package": "com.bitto.semicolon"
     },
     "web": {
       "output": "static",
@@ -55,7 +55,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "c3e32bf4-20fb-4901-8ccb-c98e861dcd7d"
+        "projectId": "99fdd875-0408-4cc9-8896-4e4f7933ecf3"
       }
     }
   }

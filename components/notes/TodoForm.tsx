@@ -11,6 +11,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { PRIORITY_OPTIONS } from '../../constants/todos';
 import { formatDateTime, getPriorityColor } from '../../scripts/todoHelpers';
 
@@ -78,126 +80,131 @@ export const TodoForm: React.FC<TodoFormProps> = ({
             transparent={true}
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.modalKeyboardView}
-                >
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>
-                                {editingTodoId ? 'Edit Task' : 'New Task'}
-                            </Text>
-                            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                                <X size={20} color="#9CA3AF" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="What do you need to do?"
-                            placeholderTextColor="#9CA3AF"
-                            value={todoText}
-                            onChangeText={onTextChange}
-                            maxLength={200}
-                            autoFocus
-                        />
-
-                        <View style={styles.modalRow}>
-                            <TouchableOpacity style={styles.datePickerButton} onPress={handleDatePress}>
-                                <Calendar size={18} color="#6B7280" />
-                                <Text style={styles.datePickerText}>
-                                    {dueDate ? dueDate.toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric'
-                                    }) : 'Set Date'}
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.modalOverlay}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.modalKeyboardView}
+                    >
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>
+                                    {editingTodoId ? 'Edit Task' : 'New Task'}
                                 </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={styles.datePickerButton} onPress={handleTimePress}>
-                                <Clock size={18} color="#6B7280" />
-                                <Text style={styles.datePickerText}>
-                                    {dueTime ? dueTime.toLocaleTimeString('en-US', {
-                                        hour: 'numeric',
-                                        minute: '2-digit',
-                                        hour12: true
-                                    }) : 'Set Time'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {(dueDate || dueTime) && (
-                            <View style={styles.dateDisplay}>
-                                <Text style={styles.dateDisplayText}>
-                                    {formatDateTime(dueDate, dueTime)}
-                                </Text>
+                                <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                                    <X size={20} color="#9CA3AF" />
+                                </TouchableOpacity>
                             </View>
-                        )}
 
-                        <View style={styles.modalRow}>
-                            <Text style={styles.modalLabel}>Priority</Text>
-                            <View style={styles.priorityContainer}>
-                                {PRIORITY_OPTIONS.map((p) => (
-                                    <TouchableOpacity
-                                        key={p}
-                                        style={[
-                                            styles.priorityButton,
-                                            priority === p && styles.priorityButtonActive,
-                                            { borderColor: getPriorityColor(p) },
-                                        ]}
-                                        onPress={() => onPriorityChange(p)}
-                                    >
-                                        <View style={[styles.priorityDotSmall, { backgroundColor: getPriorityColor(p) }]} />
-                                        <Text style={[
-                                            styles.priorityButtonText,
-                                            priority === p && styles.priorityButtonTextActive,
-                                        ]}>
-                                            {p.charAt(0).toUpperCase() + p.slice(1)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="What do you need to do?"
+                                placeholderTextColor="#9CA3AF"
+                                value={todoText}
+                                onChangeText={onTextChange}
+                                maxLength={200}
+                                autoFocus
+                            />
+
+                            <View style={styles.modalRow}>
+                                <TouchableOpacity style={styles.datePickerButton} onPress={handleDatePress}>
+                                    <Calendar size={18} color="#6B7280" />
+                                    <Text style={styles.datePickerText}>
+                                        {dueDate ? dueDate.toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        }) : 'Set Date'}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.datePickerButton} onPress={handleTimePress}>
+                                    <Clock size={18} color="#6B7280" />
+                                    <Text style={styles.datePickerText}>
+                                        {dueTime ? dueTime.toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        }) : 'Set Time'}
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-                        </View>
 
-                        <TouchableOpacity
-                            style={[styles.modalSaveButton, !todoText.trim() && styles.modalSaveButtonDisabled]}
-                            onPress={onSave}
-                            disabled={!todoText.trim() || isSaving}
-                            activeOpacity={0.8}
-                        >
-                            <Text style={styles.modalSaveButtonText}>
-                                {editingTodoId ? 'Update Task' : 'Add Task'}
-                            </Text>
-                        </TouchableOpacity>
+                            {(dueDate || dueTime) && (
+                                <View style={styles.dateDisplay}>
+                                    <Text style={styles.dateDisplayText}>
+                                        {formatDateTime(dueDate, dueTime)}
+                                    </Text>
+                                </View>
+                            )}
 
-                        {(dueDate || dueTime) && (
-                            <TouchableOpacity style={styles.clearDateButton} onPress={onClearDateTime}>
-                                <Text style={styles.clearDateText}>Clear date & time</Text>
+                            <View style={styles.modalRow}>
+                                <Text style={styles.modalLabel}>Priority</Text>
+                                <View style={styles.priorityContainer}>
+                                    {PRIORITY_OPTIONS.map((p) => (
+                                        <TouchableOpacity
+                                            key={p}
+                                            style={[
+                                                styles.priorityButton,
+                                                priority === p && styles.priorityButtonActive,
+                                                { borderColor: getPriorityColor(p) },
+                                            ]}
+                                            onPress={() => onPriorityChange(p)}
+                                        >
+                                            <View style={[styles.priorityDotSmall, { backgroundColor: getPriorityColor(p) }]} />
+                                            <Text style={[
+                                                styles.priorityButtonText,
+                                                priority === p && styles.priorityButtonTextActive,
+                                            ]}>
+                                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.modalSaveButton, !todoText.trim() && styles.modalSaveButtonDisabled]}
+                                onPress={onSave}
+                                disabled={!todoText.trim() || isSaving}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.modalSaveButtonText}>
+                                    {editingTodoId ? 'Update Task' : 'Add Task'}
+                                </Text>
                             </TouchableOpacity>
-                        )}
-                    </View>
-                </KeyboardAvoidingView>
-            </View>
 
-            {(showDatePicker || showTimePicker) && (
-                <DateTimePicker
-                    value={pickerMode === 'date' ? (dueDate || new Date()) : (dueTime || new Date())}
-                    mode={pickerMode}
-                    is24Hour={false}
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={onDatePickerChange}
-                    minimumDate={pickerMode === 'date' ? new Date() : undefined}
-                />
-            )}
+                            {(dueDate || dueTime) && (
+                                <TouchableOpacity style={styles.clearDateButton} onPress={onClearDateTime}>
+                                    <Text style={styles.clearDateText}>Clear date & time</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </KeyboardAvoidingView>
+                </View>
+
+                {(showDatePicker || showTimePicker) && (
+                    <DateTimePicker
+                        value={pickerMode === 'date' ? (dueDate || new Date()) : (dueTime || new Date())}
+                        mode={pickerMode}
+                        is24Hour={false}
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={onDatePickerChange}
+                        minimumDate={pickerMode === 'date' ? new Date() : undefined}
+                    />
+                )}
+            </SafeAreaView>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
+    safeArea: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',
+    },
+    modalOverlay: {
+        flex: 1,
         justifyContent: 'flex-end',
     },
     modalKeyboardView: {
