@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/Download-APK-success?style=flat&logo=android" alt="Download APK">
 </a>
 
-<b>Version:</b> <code>1.2.0 (11)</code> • <b>APK Size:</b> <code>~92 MB</code>
+<b>Version:</b> <code>1.2.12</code> • <b>APK Size:</b> <code>~92 MB</code>
 
 </div>
 
