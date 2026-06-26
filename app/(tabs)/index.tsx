@@ -112,6 +112,10 @@ const ContestSchedule: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#f0f2f5',
+    },
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
