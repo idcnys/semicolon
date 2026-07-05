@@ -59,55 +59,60 @@ export const CoverForm: React.FC<CoverFormProps> = ({
         }
     };
 
+    const renderSection = (title: string, icon: React.ReactNode, children: React.ReactNode) => (
+        <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+                {icon}
+                <Text style={styles.sectionHeaderText}>{title}</Text>
+            </View>
+            <View style={styles.sectionContent}>
+                {children}
+            </View>
+        </View>
+    );
+
+    const renderField = (label: string, children: React.ReactNode, half?: boolean) => (
+        <View style={[styles.fieldContainer, half && styles.fieldHalf]}>
+            <Text style={styles.label}>{label}</Text>
+            {children}
+        </View>
+    );
+
     return (
         <View style={styles.container}>
             {/* Course Information */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Bookmark size={16} color="#37352f" />
-                    <Text style={styles.sectionHeaderText}>Course Information</Text>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Course No.</Text>
+            {renderSection('Course Information', <Bookmark size={15} color="#555" />,
+                <>
+                    <View style={styles.row}>
+                        {renderField('Course No.', 
                             <TextInput
                                 style={styles.input}
                                 value={state.courseNo}
                                 onChangeText={(value: string) => onFieldChange('courseNo', value)}
                                 placeholder="e.g. CSE 101"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, true
+                        )}
                     </View>
-
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldFull}>
-                            <Text style={styles.label}>Course Title</Text>
+                    <View style={styles.row}>
+                        {renderField('Course Title',
                             <TextInput
                                 style={styles.input}
                                 value={state.courseTitle}
                                 onChangeText={(value: string) => onFieldChange('courseTitle', value)}
                                 placeholder="Introduction to Programming"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, false
+                        )}
                     </View>
-                </View>
-            </View>
+                </>
+            )}
 
             {/* Assignment Details */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Layers size={16} color="#37352f" />
-                    <Text style={styles.sectionHeaderText}>Assignment Details</Text>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Type</Text>
+            {renderSection('Assignment Details', <Layers size={15} color="#555" />,
+                <>
+                    <View style={styles.row}>
+                        {renderField('Type', 
                             <View style={styles.pickerContainer}>
                                 {TYPE_OPTIONS.map(({ value, label }) => (
                                     <TouchableOpacity
@@ -126,36 +131,31 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
-                            </View>
-                        </View>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Type No.</Text>
+                            </View>, true
+                        )}
+                        {renderField('Type No.',
                             <TextInput
                                 style={styles.input}
                                 value={state.typeNo}
                                 onChangeText={(value: string) => onFieldChange('typeNo', value)}
                                 placeholder="e.g. 01"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, true
+                        )}
                     </View>
-
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldFull}>
-                            <Text style={styles.label}>Type Title</Text>
+                    <View style={styles.row}>
+                        {renderField('Type Title',
                             <TextInput
                                 style={styles.input}
                                 value={state.typeTitle}
                                 onChangeText={(value: string) => onFieldChange('typeTitle', value)}
                                 placeholder="Arrays and Loops"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, false
+                        )}
                     </View>
-
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldFull}>
-                            <Text style={styles.label}>Section</Text>
+                    <View style={styles.row}>
+                        {renderField('Section',
                             <View style={styles.pickerContainer}>
                                 {SECTIONS.map((section) => (
                                     <TouchableOpacity
@@ -174,76 +174,61 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
-                            </View>
-                        </View>
+                            </View>, false
+                        )}
                     </View>
-                </View>
-            </View>
+                </>
+            )}
 
             {/* Teacher Information */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <User size={16} color="#37352f" />
-                    <Text style={styles.sectionHeaderText}>Teacher Information</Text>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Name</Text>
+            {renderSection('Teacher Information', <User size={15} color="#555" />,
+                <>
+                    <View style={styles.row}>
+                        {renderField('Name',
                             <TextInput
                                 style={styles.input}
                                 value={state.teacherName}
                                 onChangeText={(value: string) => onFieldChange('teacherName', value)}
                                 placeholder="Dr. Sarah Ahmed"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Designation</Text>
+                                placeholderTextColor="#aaa"
+                            />, true
+                        )}
+                        {renderField('Designation',
                             <TextInput
                                 style={styles.input}
                                 value={state.teacherDesignation}
                                 onChangeText={(value: string) => onFieldChange('teacherDesignation', value)}
                                 placeholder="Professor"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, true
+                        )}
                     </View>
-
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldFull}>
-                            <Text style={styles.label}>Department</Text>
+                    <View style={styles.row}>
+                        {renderField('Department',
                             <TextInput
                                 style={styles.input}
                                 value={state.teacherDept}
                                 onChangeText={(value: string) => onFieldChange('teacherDept', value)}
                                 placeholder="Computer Science & Engineering"
-                                placeholderTextColor="#9b9a97"
-                            />
-                        </View>
+                                placeholderTextColor="#aaa"
+                            />, false
+                        )}
                     </View>
-                </View>
-            </View>
+                </>
+            )}
 
             {/* Dates */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Clock size={16} color="#37352f" />
-                    <Text style={styles.sectionHeaderText}>Dates</Text>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                    <View style={styles.fieldRow}>
-                        {(state.typeSelect === 'lab-report' || state.typeSelect === 'project') && (
-                            <View style={styles.fieldHalf}>
-                                <Text style={styles.label}>Experiment Date</Text>
+            {renderSection('Dates', <Clock size={15} color="#555" />,
+                <View style={styles.row}>
+                    {(state.typeSelect === 'lab-report' || state.typeSelect === 'project') && (
+                        renderField('Experiment Date',
+                            <>
                                 <TouchableOpacity
                                     style={styles.dateInput}
                                     onPress={() => onExpDatePickerChange(true)}
                                 >
                                     <Text style={styles.dateText}>{formatDate(state.expDate)}</Text>
-                                    <Calendar size={18} color="#9b9a97" />
+                                    <Calendar size={16} color="#999" />
                                 </TouchableOpacity>
                                 {showExpDatePicker && (
                                     <DateTimePicker
@@ -253,20 +238,17 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                                         onChange={onExpDateChange}
                                     />
                                 )}
-                            </View>
-                        )}
-                        <View style={[
-                            (state.typeSelect === 'lab-report' || state.typeSelect === 'project') 
-                                ? styles.fieldHalf 
-                                : styles.fieldFull
-                        ]}>
-                            <Text style={styles.label}>Submission Date</Text>
+                            </>, true
+                        )
+                    )}
+                    {renderField('Submission Date',
+                        <>
                             <TouchableOpacity
                                 style={styles.dateInput}
                                 onPress={() => onSubDatePickerChange(true)}
                             >
                                 <Text style={styles.dateText}>{formatDate(state.subDate)}</Text>
-                                <Calendar size={18} color="#9b9a97" />
+                                <Calendar size={16} color="#999" />
                             </TouchableOpacity>
                             {showSubDatePicker && (
                                 <DateTimePicker
@@ -276,43 +258,35 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                                     onChange={onSubDateChange}
                                 />
                             )}
-                        </View>
-                    </View>
+                        </>, 
+                        (state.typeSelect === 'lab-report' || state.typeSelect === 'project') ? true : false
+                    )}
                 </View>
-            </View>
+            )}
 
             {/* Student Information */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <UserCircle size={16} color="#37352f" />
-                    <Text style={styles.sectionHeaderText}>Student Information</Text>
+            {renderSection('Student Information', <UserCircle size={15} color="#555" />,
+                <View style={styles.row}>
+                    {renderField('Full Name',
+                        <TextInput
+                            style={styles.input}
+                            placeholder="John Doe"
+                            placeholderTextColor="#aaa"
+                            value={state.studentName}
+                            onChangeText={(value: string) => onFieldChange('studentName', value)}
+                        />, true
+                    )}
+                    {renderField('Roll Number',
+                        <TextInput
+                            style={styles.input}
+                            placeholder="2403001"
+                            placeholderTextColor="#aaa"
+                            value={state.studentRoll}
+                            onChangeText={(value: string) => onFieldChange('studentRoll', value)}
+                        />, true
+                    )}
                 </View>
-
-                <View style={styles.fieldGroup}>
-                    <View style={styles.fieldRow}>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Full Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="John Doe"
-                                placeholderTextColor="#9b9a97"
-                                value={state.studentName}
-                                onChangeText={(value: string) => onFieldChange('studentName', value)}
-                            />
-                        </View>
-                        <View style={styles.fieldHalf}>
-                            <Text style={styles.label}>Roll Number</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="2403001"
-                                placeholderTextColor="#9b9a97"
-                                value={state.studentRoll}
-                                onChangeText={(value: string) => onFieldChange('studentRoll', value)}
-                            />
-                        </View>
-                    </View>
-                </View>
-            </View>
+            )}
 
             {/* Actions */}
             <View style={styles.actions}>
@@ -320,7 +294,7 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                     style={[styles.button, styles.buttonSecondary]}
                     onPress={onPreview}
                 >
-                    <Eye size={16} color="#37352f" />
+                    <Eye size={16} color="#555" />
                     <Text style={styles.buttonSecondaryText}>Preview</Text>
                 </TouchableOpacity>
 
@@ -329,7 +303,7 @@ export const CoverForm: React.FC<CoverFormProps> = ({
                     onPress={onGeneratePDF}
                     disabled={isGenerating}
                 >
-                    <FileText size={16} color="#ffffff" />
+                    <FileText size={16} color="#fff" />
                     <Text style={styles.buttonPrimaryText}>
                         {isGenerating ? 'Generating...' : 'Generate PDF'}
                     </Text>
@@ -341,142 +315,146 @@ export const CoverForm: React.FC<CoverFormProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         borderRadius: 12,
-        padding: 24,
-        marginBottom: 24,
+        padding: 16,
+        marginBottom: 20,
         borderWidth: 1,
-        borderColor: '#e8e7e4',
+        borderColor: '#e8e5e0',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 2,
+        elevation: 1,
     },
     section: {
-        marginBottom: 24,
+        marginBottom: 16,
     },
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
-        paddingBottom: 8,
+        marginBottom: 10,
+        paddingBottom: 6,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0efec',
+        borderBottomColor: '#f0eeea',
     },
     sectionHeaderText: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#37352f',
-        letterSpacing: 0.3,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#444',
+        letterSpacing: 0.4,
         textTransform: 'uppercase',
-        marginLeft: 8,
+        marginLeft: 7,
     },
-    fieldGroup: {
-        marginBottom: 4,
+    sectionContent: {
+        gap: 6,
     },
-    fieldRow: {
+    row: {
         flexDirection: 'row',
-        marginBottom: 8,
+        gap: 8,
+    },
+    fieldContainer: {
+        flex: 1,
+        gap: 4,
     },
     fieldHalf: {
-        flex: 1,
-        marginRight: 6,
-    },
-    fieldFull: {
-        flex: 1,
+        flex: 0.5,
     },
     label: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '500',
-        color: '#6b6b6b',
+        color: '#777',
         letterSpacing: 0.2,
-        marginBottom: 4,
     },
     input: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fafaf8',
         borderWidth: 1,
-        borderColor: '#e8e7e4',
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        fontSize: 14,
-        color: '#37352f',
-        minHeight: 40,
+        borderColor: '#e8e5e0',
+        borderRadius: 6,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        fontSize: 13,
+        color: '#333',
+        minHeight: 36,
     },
     pickerContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        gap: 4,
     },
     pickerOption: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        backgroundColor: '#f7f6f3',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        backgroundColor: '#f5f4f0',
         borderWidth: 1,
         borderColor: 'transparent',
-        minHeight: 32,
+        minHeight: 28,
         justifyContent: 'center',
-        marginRight: 6,
-        marginBottom: 4,
     },
     pickerOptionSelected: {
-        backgroundColor: '#37352f',
-        borderColor: '#37352f',
+        backgroundColor: '#333',
+        borderColor: '#333',
     },
     pickerOptionText: {
-        color: '#37352f',
-        fontSize: 13,
-        fontWeight: '450',
+        color: '#555',
+        fontSize: 12,
+        fontWeight: '500',
     },
     pickerOptionTextSelected: {
-        color: '#ffffff',
+        color: '#fff',
     },
     dateInput: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fafaf8',
         borderWidth: 1,
-        borderColor: '#e8e7e4',
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
+        borderColor: '#e8e5e0',
+        borderRadius: 6,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        minHeight: 40,
+        minHeight: 36,
     },
     dateText: {
-        fontSize: 14,
-        color: '#37352f',
+        fontSize: 13,
+        color: '#333',
     },
     actions: {
         flexDirection: 'row',
-        marginTop: 8,
-        paddingTop: 20,
+        marginTop: 4,
+        paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: '#f0efec',
+        borderTopColor: '#f0eeea',
+        gap: 8,
     },
     button: {
         flex: 1,
         flexDirection: 'row',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 6,
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 44,
-        marginHorizontal: 4,
+        minHeight: 38,
+        gap: 6,
     },
     buttonPrimary: {
-        backgroundColor: '#37352f',
+        backgroundColor: '#333',
     },
     buttonSecondary: {
-        backgroundColor: '#f7f6f3',
+        backgroundColor: '#f5f4f0',
         borderWidth: 1,
-        borderColor: '#e8e7e4',
+        borderColor: '#e8e5e0',
     },
     buttonPrimaryText: {
-        color: '#ffffff',
+        color: '#fff',
         fontWeight: '500',
-        fontSize: 14,
+        fontSize: 13,
     },
     buttonSecondaryText: {
-        color: '#37352f',
+        color: '#555',
         fontWeight: '500',
-        fontSize: 14,
+        fontSize: 13,
     },
 });

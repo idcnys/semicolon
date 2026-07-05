@@ -31,26 +31,33 @@ export default function CoverPageGenerator() {
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-            <StatusBar style="auto" />
-            <ScrollView style={styles.container}>
-                <View style={styles.app}>
-                    <View style={styles.header}>
-                        <BookOpen size={28} color="#2a7de1" />
-                        <Text style={styles.title}>Cover Page Generator</Text>
+            <StatusBar style="dark" />
+            <ScrollView 
+                style={styles.container}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.header}>
+                    <View style={styles.headerIconContainer}>
+                        <BookOpen size={22} color="#2a7de1" />
                     </View>
-
-                    <CoverForm
-                        state={state}
-                        showExpDatePicker={showExpDatePicker}
-                        showSubDatePicker={showSubDatePicker}
-                        onFieldChange={handleChange}
-                        onExpDatePickerChange={setExpDatePicker}
-                        onSubDatePickerChange={setSubDatePicker}
-                        onPreview={handleGenerate}
-                        onGeneratePDF={handleGeneratePDF}
-                        isGenerating={isGenerating}
-                    />
+                    <View>
+                        <Text style={styles.title}>Cover Page Generator</Text>
+                        <Text style={styles.subtitle}>Faster, Offline, Secure </Text>
+                    </View>
                 </View>
+
+                <CoverForm
+                    state={state}
+                    showExpDatePicker={showExpDatePicker}
+                    showSubDatePicker={showSubDatePicker}
+                    onFieldChange={handleChange}
+                    onExpDatePickerChange={setExpDatePicker}
+                    onSubDatePickerChange={setSubDatePicker}
+                    onPreview={handleGenerate}
+                    onGeneratePDF={handleGeneratePDF}
+                    isGenerating={isGenerating}
+                />
             </ScrollView>
 
             <CoverPreviewModal
@@ -67,30 +74,44 @@ export default function CoverPageGenerator() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#f5f7fa',
     },
     container: {
         flex: 1,
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#f5f7fa',
     },
-    app: {
-        flex: 1,
-        padding: 15,
-        paddingBottom: 40,
+    scrollContent: {
+        padding: 16,
+        paddingBottom: 30,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-        marginTop: 10,
-        marginBottom: 20,
-        paddingBottom: 18,
-        borderBottomWidth: 2,
-        borderBottomColor: '#eef2f7',
+        gap: 14,
+        marginBottom: 18,
+        paddingBottom: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e8ecf1',
+    },
+    headerIconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: '#e8f0fe',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     title: {
-        fontSize: 26,
-        fontWeight: '600',
-        color: '#1e2a3a',
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#1a2634',
+        letterSpacing: -0.3,
+    },
+    subtitle: {
+        fontSize: 12,
+        color: '#6b7a8a',
+        fontWeight: '400',
+        marginTop: 1,
+        letterSpacing: 0.2,
     },
 });
