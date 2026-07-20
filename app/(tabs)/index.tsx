@@ -1,11 +1,12 @@
 import { AlertCircle, Trophy } from 'lucide-react-native';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     FlatList,
     RefreshControl,
     StyleSheet,
     Text,
     View,
+    TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,6 +27,19 @@ const ContestSchedule: React.FC = () => {
         contestCount,
         onRefresh,
     } = useContests();
+
+    const [platformFilter, setPlatformFilter] = useState<'All' | 'Codeforces' | 'AtCoder' | 'CodeChef'>('All');
+
+    const filteredContests = useMemo(() => {
+        if (platformFilter === 'All') return groupedContests;
+        // Filter contests within each group
+        return groupedContests
+            .map(group => ({
+                ...group,
+                contests: group.contests.filter(c => c.platform === platformFilter)
+            }))
+            .filter(group => group.contests.length > 0);
+    }, [groupedContests, platformFilter]);
 
     const renderItem = ({ item }: { item: GroupedContests }) => (
         <View style={styles.groupContainer}>
@@ -63,6 +77,20 @@ const ContestSchedule: React.FC = () => {
                     )}
                 </View>
             </View>
+            <View style={styles.filterRow}>
+                {['All', 'Codeforces', 'AtCoder', 'CodeChef'].map((p) => (
+                    <TouchableOpacity
+                        key={p}
+                        onPress={() => setPlatformFilter(p as any)}
+                        style={[
+                            styles.filterButton,
+                            platformFilter === p && styles.filterButtonActive
+                        ]}
+                    >
+                        <Text style={[styles.filterText, platformFilter === p && styles.filterTextActive]}>{p}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
             
             {error && (
                 <View style={styles.errorBanner}>
@@ -92,7 +120,7 @@ const ContestSchedule: React.FC = () => {
             )}
             
             <FlatList
-                data={groupedContests}
+                data={filteredContests}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.date}
                 refreshControl={
@@ -220,6 +248,35 @@ const styles = StyleSheet.create({
     listContent: {
         padding: 16,
         paddingTop: 12,
+    },
+    filterRow: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+        gap: 8,
+    },
+    filterButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 999,
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    filterButtonActive: {
+        backgroundColor: '#EFF6FF',
+        borderColor: '#BFDBFE',
+    },
+    filterText: {
+        fontSize: 13,
+        color: '#475569',
+        fontWeight: '600',
+    },
+    filterTextActive: {
+        color: '#1D4ED8',
     },
     groupContainer: {
         marginBottom: 20,
