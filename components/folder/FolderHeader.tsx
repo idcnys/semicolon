@@ -5,21 +5,25 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
+    Image
 } from 'react-native';
+
 
 interface Props {
     title: string;
     folderStack: string[];
     folderNames: Record<string, string>;
     onBreadcrumbPress: (index: number) => void;
+        onOpenBookmarks?: () => void;
 }
 
 export const FolderHeader: React.FC<Props> = ({ 
     title, 
     folderStack, 
     folderNames, 
-    onBreadcrumbPress 
+    onBreadcrumbPress,
+    onOpenBookmarks
 }) => {
     const breadcrumbScrollViewRef = useRef<ScrollView>(null);
 
@@ -29,9 +33,21 @@ export const FolderHeader: React.FC<Props> = ({
 
     return (
         <View style={styles.header}>
-            <Text style={styles.title} numberOfLines={1}>
-                {title}
-            </Text>
+            <View style={styles.topRow}>
+                <Text style={styles.title} numberOfLines={1}>
+                    {title}
+                </Text>
+                <TouchableOpacity
+                    onPress={() => onOpenBookmarks && onOpenBookmarks()}
+                    style={styles.bookmarkButton}
+                >
+                    <Image
+                        source={require('../../assets/icons/bookmark.png')}
+                        style={styles.bookmarkIcon}
+                    />
+                </TouchableOpacity>
+            </View>
+
             <ScrollView
                 horizontal
                 ref={breadcrumbScrollViewRef}
@@ -77,6 +93,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold', 
         color: '#202124', 
         marginBottom: 8 
+    },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    bookmarkButton: {
+        padding: 6,
+        borderRadius: 8,
+        backgroundColor: 'transparent'
+    },
+    bookmarkIcon: {
+        width: 22,
+        height: 22,
+        resizeMode: 'contain',
+        tintColor: '#1a73e8'
     },
     breadcrumbContainer: { 
         alignItems: 'center', 

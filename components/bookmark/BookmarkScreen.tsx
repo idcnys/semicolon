@@ -9,13 +9,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BookmarkEmptyState } from '../../components/bookmark/BookmarkEmptyState';
-import { BookmarkItem } from '../../components/bookmark/BookmarkItem';
-import { PreviewModal } from '../../components/bookmark/PreviewModal';
+import { BookmarkEmptyState } from './BookmarkEmptyState';
+import { BookmarkItem } from './BookmarkItem';
+import { PreviewModal } from './PreviewModal';
 import { BookmarkItem as BookmarkItemType, useBookmarks } from '../../hooks/useBookmarks';
 import { getFileType } from '../../scripts/fileHelpers';
 
-export default function BookmarksScreen() {
+interface Props {
+    onClose?: () => void;
+}
+
+export default function BookmarkScreen({ onClose }: Props) {
     const { bookmarks, loading, removeBookmark, clearAllBookmarks } = useBookmarks();
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewItem, setPreviewItem] = useState<BookmarkItemType | null>(null);
@@ -35,19 +39,26 @@ export default function BookmarksScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={styles.safeContainer} edges={["top", "left", "right"]}>
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Bookmarks</Text>
-                    {bookmarks.length > 0 && (
-                        <TouchableOpacity 
-                            onPress={clearAllBookmarks} 
-                            style={styles.clearButton}
-                        >
-                            <Trash2 size={18} color="#EA4335" />
-                            <Text style={styles.clearButtonText}>Clear All</Text>
-                        </TouchableOpacity>
-                    )}
+                    <View style={styles.headerActions}>
+                        {onClose && (
+                            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        )}
+                        {bookmarks.length > 0 && (
+                            <TouchableOpacity 
+                                onPress={clearAllBookmarks} 
+                                style={styles.clearButton}
+                            >
+                                <Trash2 size={18} color="#EA4335" />
+                                <Text style={styles.clearButtonText}>Clear All</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 {loading ? (
@@ -107,6 +118,22 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#202124',
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    closeButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        backgroundColor: '#f1f3f4',
+        borderRadius: 6,
+    },
+    closeButtonText: {
+        fontSize: 14,
+        color: '#1a73e8',
+        fontWeight: '500',
     },
     clearButton: {
         flexDirection: 'row',

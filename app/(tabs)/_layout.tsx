@@ -29,18 +29,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="bookmark"
-        options={{
-          title: 'Bookmarks',
-          tabBarIcon: ({ focused }) => (
-            <Image 
-              source={require('../../assets/icons/bookmark.png')} 
-              style={[styles.icon, { tintColor: focused ? '#007AFF' : '#8E8E93' }]} 
-            />
-          ),
-        }}
-      />
       
       <Tabs.Screen
         name="folder"

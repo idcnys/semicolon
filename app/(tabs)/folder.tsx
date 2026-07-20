@@ -4,7 +4,8 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    View
+    View,
+    Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { isFolder } from '../../scripts/driveApi';
@@ -20,6 +21,7 @@ import { useFolderNavigation } from '../../hooks/useFolderNavigation';
 import { FolderEmptyState } from '../../components/folder/EmptyState';
 import { FolderCard } from '../../components/folder/FolderCard';
 import { FolderHeader } from '../../components/folder/FolderHeader';
+import BookmarkScreen from '../../components/bookmark/BookmarkScreen';
 import { FolderItem } from '../../components/folder/FolderItem';
 import { FolderLoadingSkeleton } from '../../components/folder/FolderLoadingSkeleton';
 import { PreviewModal } from '../../components/folder/PreviewModal';
@@ -43,6 +45,8 @@ export default function FolderScreen() {
     } = useFolderNavigation();
 
     const { toggleBookmark, isBookmarked } = useBookmarks();
+
+    const [bookmarksVisible, setBookmarksVisible] = useState(false);
 
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewItem, setPreviewItem] = useState<DriveItem | null>(null);
@@ -114,6 +118,7 @@ export default function FolderScreen() {
                     folderStack={folderStack}
                     folderNames={folderNames}
                     onBreadcrumbPress={navigateToBreadcrumb}
+                    onOpenBookmarks={() => setBookmarksVisible(true)}
                 />
 
                 {folderStack.length === 0 ? (
@@ -152,6 +157,14 @@ export default function FolderScreen() {
                     onClose={closePreview}
                     onBookmarkToggle={handleBookmarkToggle}
                 />
+
+                <Modal
+                    visible={bookmarksVisible}
+                    animationType="slide"
+                    onRequestClose={() => setBookmarksVisible(false)}
+                >
+                    <BookmarkScreen onClose={() => setBookmarksVisible(false)} />
+                </Modal>
             </View>
         </SafeAreaView>
     );
