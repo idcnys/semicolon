@@ -44,11 +44,6 @@ export default function BookmarkScreen({ onClose }: Props) {
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Bookmarks</Text>
                     <View style={styles.headerActions}>
-                        {onClose && (
-                            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                                <Text style={styles.closeButtonText}>Close</Text>
-                            </TouchableOpacity>
-                        )}
                         {bookmarks.length > 0 && (
                             <TouchableOpacity 
                                 onPress={clearAllBookmarks} 
@@ -58,6 +53,12 @@ export default function BookmarkScreen({ onClose }: Props) {
                                 <Text style={styles.clearButtonText}>Clear All</Text>
                             </TouchableOpacity>
                         )}
+                        {onClose && (
+                            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        )}
+                        
                     </View>
                 </View>
 
