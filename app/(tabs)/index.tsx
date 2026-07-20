@@ -121,7 +121,7 @@ export default function FolderScreen() {
                 />
 
                 {folderStack.length === 0 ? (
-                    rootFoldersLoading ? (
+                    rootFoldersLoading && rootFolders.length === 0 ? (
                         <FolderLoadingSkeleton type="dashboard" />
                     ) : rootFoldersError ? (
                         <View style={[styles.container, styles.centerContent]}>
@@ -155,7 +155,7 @@ export default function FolderScreen() {
                             </View>
                         </ScrollView>
                     )
-                ) : loading ? (
+                ) : loading && items.length === 0 ? (
                     <FolderLoadingSkeleton type="list" />
                 ) : error ? (
                     <FolderEmptyState type="error" error={error} onRetry={refresh} />
@@ -168,6 +168,7 @@ export default function FolderScreen() {
                         renderItem={renderItem}
                         contentContainerStyle={styles.listContainer}
                         ItemSeparatorComponent={() => <View style={styles.separator} />}
+                        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#2563EB" colors={["#2563EB"]} />}
                     />
                 )}
 
