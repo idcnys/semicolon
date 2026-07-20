@@ -1,277 +1,254 @@
-import { AlertCircle, Trophy } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
     FlatList,
+    Modal,
     RefreshControl,
+    ScrollView,
     StyleSheet,
     Text,
-    View,
-    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { isFolder } from '../../scripts/driveApi';
 
-import { ContestCard } from '../../components/contests/ContestCard';
-import { ContestLoadingSkeleton } from '../../components/contests/ContestLoadingSkeleton';
-import { DateHeader } from '../../components/contests/DateHeader';
-import { EmptyState } from '../../components/contests/EmptyState';
-import { useContests } from '../../hooks/useContests';
-import { GroupedContests } from '../../types/contests';
+// Types
+import { DriveItem } from '../../types/drive';
 
-const ContestSchedule: React.FC = () => {
+// Hooks
+import { useBookmarks } from '../../hooks/useBookmarks';
+import { useFolderNavigation } from '../../hooks/useFolderNavigation';
+
+// Components
+import BookmarkScreen from '../../components/bookmark/BookmarkScreen';
+import { FolderEmptyState } from '../../components/folder/EmptyState';
+import { FolderCard } from '../../components/folder/FolderCard';
+import { FolderHeader } from '../../components/folder/FolderHeader';
+import { FolderItem } from '../../components/folder/FolderItem';
+import { FolderLoadingSkeleton } from '../../components/folder/FolderLoadingSkeleton';
+import { PreviewModal } from '../../components/folder/PreviewModal';
+
+export default function FolderScreen() {
     const {
-        groupedContests,
+        folderStack,
+        folderNames,
+        items,
         loading,
-        refreshing,
         error,
-        usingFallback,
-        contestCount,
-        onRefresh,
-    } = useContests();
+        currentFolderId,
+        rootFolders,
+        rootFoldersLoading,
+        rootFoldersError,
+        navigateToFolder,
+        navigateToRoot,
+        navigateToBreadcrumb,
+        refresh,
+        refreshRootFolders,
+        reorderRootFolders,
+        togglePin,
+        persistFolderPrefs
+    } = useFolderNavigation();
 
-    const [platformFilter, setPlatformFilter] = useState<'All' | 'Codeforces' | 'AtCoder' | 'CodeChef'>('All');
+    const { toggleBookmark, isBookmarked } = useBookmarks();
 
-    const filteredContests = useMemo(() => {
-        if (platformFilter === 'All') return groupedContests;
-        // Filter contests within each group
-        return groupedContests
-            .map(group => ({
-                ...group,
-                contests: group.contests.filter(c => c.platform === platformFilter)
-            }))
-            .filter(group => group.contests.length > 0);
-    }, [groupedContests, platformFilter]);
+    const [bookmarksVisible, setBookmarksVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
 
-    const getCount = (p: string) => {
-        if (!contestCount) return 0;
-        if (p === 'All') return contestCount.total || 0;
-        if (p === 'Codeforces') return contestCount.codeforces || 0;
-        if (p === 'AtCoder') return contestCount.atcoder || 0;
-        if (p === 'CodeChef') return contestCount.codechef || 0;
-        return 0;
+    const toggleEdit = async () => {
+        if (editMode) {
+            // saving
+            try {
+                await persistFolderPrefs(rootFolders as any);
+            } catch (e) {
+                console.error('Failed to persist on save', e);
+            }
+        }
+        setEditMode(prev => !prev);
     };
 
-    const renderItem = ({ item }: { item: GroupedContests }) => (
-        <View style={styles.groupContainer}>
-            <DateHeader date={item.date} count={item.count} />
-            {item.contests.map((contest) => (
-                <ContestCard key={contest.id} contest={contest} />
-            ))}
-        </View>
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewItem, setPreviewItem] = useState<DriveItem | null>(null);
+
+    const handlePressItem = (item: DriveItem) => {
+        if (isFolder(item.mimeType)) {
+            navigateToFolder(item.id, item.name);
+        } else {
+            setPreviewItem(item);
+            setPreviewVisible(true);
+        }
+    };
+
+    const closePreview = () => {
+        setPreviewVisible(false);
+        setPreviewItem(null);
+    };
+
+    const handleBookmarkToggle = (item: DriveItem) => {
+        const currentPath = folderStack.map(id => folderNames[id] || 'Unknown');
+        toggleBookmark({
+            ...item,
+            folderPath: currentPath.length > 0 ? currentPath : ['Root']
+        });
+    };
+
+    const renderItem = ({ item }: { item: DriveItem }) => (
+        <FolderItem
+            item={item}
+            isBookmarked={isBookmarked(item.id)}
+            onPress={handlePressItem}
+            onBookmarkToggle={handleBookmarkToggle}
+        />
     );
 
-    if (loading) {
-        return <ContestLoadingSkeleton />;
-    }
+    const getTitle = () => {
+        if (!currentFolderId) return 'Shared files';
+        return folderNames[currentFolderId] || 'Folder Explorer';
+    };
+
+    // Note: keep header visible during root folder refreshes; show loading/error in content only
 
     return (
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-            <View style={styles.titleContainer}>
-                <View style={styles.titleRow}>
-                    <Trophy size={24} color="#2563EB" />
-                    <Text style={styles.title}>Upcoming Contests</Text>
-                </View>
-                <View style={styles.headerRight}>
-                    {usingFallback && (
-                        <View style={styles.fallbackBadge}>
-                            <AlertCircle size={14} color="#92400E" />
-                            <Text style={styles.fallbackBadgeText}>Demo</Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-            <View style={styles.filterRow}>
-                {[
-                    { key: 'All', label: 'All' },
-                    { key: 'Codeforces', label: 'CF' },
-                    { key: 'AtCoder', label: 'AT' },
-                    { key: 'CodeChef', label: 'CC' },
-                ].map((p) => (
-                    <TouchableOpacity
-                        key={p.key}
-                        onPress={() => setPlatformFilter(p.key as any)}
-                        style={[
-                            styles.filterButton,
-                            platformFilter === p.key && styles.filterButtonActive
-                        ]}
-                    >
-                        <View style={styles.filterInner}>
-                            <Text style={[styles.filterText, platformFilter === p.key && styles.filterTextActive]}>{p.label}</Text>
-                            {getCount(p.key) > 0 && (
-                                <View style={styles.smallBadge}>
-                                    <Text style={styles.smallBadgeText}>{getCount(p.key)}</Text>
-                                </View>
-                            )}
-                        </View>
-                    </TouchableOpacity>
-                ))}
-            </View>
-            
-            {error && (
-                <View style={styles.errorBanner}>
-                    <AlertCircle size={16} color="#991B1B" />
-                    <Text style={styles.errorBannerText}>{error}</Text>
-                </View>
-            )}
+        <SafeAreaView style={styles.safeContainer}>
+            <View style={styles.container}>
+                <FolderHeader
+                    title={getTitle()}
+                    folderStack={folderStack}
+                    folderNames={folderNames}
+                    onBreadcrumbPress={navigateToBreadcrumb}
+                    onOpenBookmarks={() => setBookmarksVisible(true)}
+                    onToggleEdit={toggleEdit}
+                    editMode={editMode}
+                    showEditButton={folderStack.length === 0}
+                />
 
-            {/* platform counts moved into filter buttons */}
-            
-            <FlatList
-                data={filteredContests}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.date}
-                refreshControl={
-                    <RefreshControl 
-                        refreshing={refreshing} 
-                        onRefresh={onRefresh}
-                        tintColor="#2563EB"
-                        colors={['#2563EB']}
+                {folderStack.length === 0 ? (
+                    rootFoldersLoading ? (
+                        <FolderLoadingSkeleton type="dashboard" />
+                    ) : rootFoldersError ? (
+                        <View style={[styles.container, styles.centerContent]}>
+                            <Text style={styles.errorText}>Failed to load directories</Text>
+                            <Text style={styles.errorSubText}>{rootFoldersError}</Text>
+                            <Text 
+                                style={styles.retryText} 
+                                onPress={refreshRootFolders}
+                            >
+                                Tap to retry
+                            </Text>
+                        </View>
+                    ) : (
+                        <ScrollView
+                            contentContainerStyle={styles.dashboardContainer}
+                            refreshControl={<RefreshControl refreshing={rootFoldersLoading} onRefresh={refreshRootFolders} tintColor="#2563EB" colors={["#2563EB"]} />}
+                        >
+                            <Text style={styles.sectionTitle}>Select a Directory</Text>
+                            <View style={styles.cardGrid}>
+                                {rootFolders.map((folder, idx) => (
+                                    <FolderCard
+                                        key={folder.id}
+                                        folder={folder as any}
+                                        onPress={() => navigateToRoot(folder.id)}
+                                        editMode={editMode}
+                                        onMoveUp={idx > 0 ? () => reorderRootFolders(idx, idx - 1) : undefined}
+                                        onMoveDown={idx < rootFolders.length - 1 ? () => reorderRootFolders(idx, idx + 1) : undefined}
+                                        onPinToggle={(id) => togglePin(id)}
+                                    />
+                                ))}
+                            </View>
+                        </ScrollView>
+                    )
+                ) : loading ? (
+                    <FolderLoadingSkeleton type="list" />
+                ) : error ? (
+                    <FolderEmptyState type="error" error={error} onRetry={refresh} />
+                ) : items.length === 0 ? (
+                    <FolderEmptyState type="empty" />
+                ) : (
+                    <FlatList
+                        data={items}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        contentContainerStyle={styles.listContainer}
+                        ItemSeparatorComponent={() => <View style={styles.separator} />}
                     />
-                }
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                ListEmptyComponent={<EmptyState onRefresh={onRefresh} />}
-            />
+                )}
+
+                <PreviewModal
+                    visible={previewVisible}
+                    item={previewItem}
+                    isBookmarked={previewItem ? isBookmarked(previewItem.id) : false}
+                    onClose={closePreview}
+                    onBookmarkToggle={handleBookmarkToggle}
+                />
+
+                <Modal
+                    visible={bookmarksVisible}
+                    animationType="slide"
+                    onRequestClose={() => setBookmarksVisible(false)}
+                >
+                    <BookmarkScreen onClose={() => setBookmarksVisible(false)} />
+                </Modal>
+            </View>
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
-    safeArea: {
+    safeContainer: { 
+        flex: 1, 
+        backgroundColor: '#f8f9fa' 
+    },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8f9fa' 
+    },
+    centerContent: {
         flex: 1,
-        backgroundColor: '#f0f2f5',
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#F8FAFC',
-    },
-    titleContainer: {
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        paddingBottom: 12,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginLeft: 8,
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    countBadge: {
-        backgroundColor: '#EFF6FF',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#BFDBFE',
-    },
-    countText: {
-        color: '#1D4ED8',
-        fontSize: 13,
-        fontWeight: '700',
-    },
-    fallbackBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FEF3C7',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-        gap: 4,
-    },
-    fallbackBadgeText: {
-        color: '#92400E',
-        fontSize: 12,
-        fontWeight: '600',
-        marginLeft: 4,
-    },
-    /* platform counts are shown in filter badges now */
-    errorBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FEE2E2',
-        padding: 12,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#FCA5A5',
-        gap: 8,
-    },
-    errorBannerText: {
-        color: '#991B1B',
-        fontSize: 14,
-        flex: 1,
-    },
-    listContent: {
-        padding: 16,
-        paddingTop: 12,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-        gap: 6,
-    },
-    filterButton: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 20,
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: 'transparent',
-    },
-    filterButtonActive: {
-        backgroundColor: '#EFF6FF',
-        borderColor: '#BFDBFE',
-    },
-    filterText: {
-        fontSize: 12,
-        color: '#475569',
-        fontWeight: '600',
-    },
-    filterTextActive: {
-        color: '#1D4ED8',
-    },
-    filterInner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    smallBadge: {
-        backgroundColor: '#EFF6FF',
-        paddingHorizontal: 4,
-        paddingVertical: 2,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#BFDBFE',
-        minWidth: 20,
-        alignItems: 'center',
         justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
     },
-    smallBadgeText: {
-        color: '#1D4ED8',
-        fontSize: 11,
-        fontWeight: '700',
+    dashboardContainer: { 
+        padding: 16 
     },
-    groupContainer: {
-        marginBottom: 20,
+    sectionTitle: { 
+        fontSize: 14, 
+        fontWeight: '700', 
+        color: '#5f6368', 
+        textTransform: 'uppercase', 
+        letterSpacing: 0.5, 
+        marginBottom: 16 
+    },
+    cardGrid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between' 
+    },
+    listContainer: { 
+        paddingHorizontal: 16, 
+        paddingVertical: 8, 
+        backgroundColor: '#fff', 
+        flexGrow: 1 
+    },
+    separator: { 
+        height: 1, 
+        backgroundColor: '#f1f3f4', 
+        marginLeft: 38 
+    },
+    errorText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#d32f2f',
+        marginBottom: 8,
+    },
+    errorSubText: {
+        fontSize: 14,
+        color: '#5f6368',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    retryText: {
+        fontSize: 16,
+        color: '#1a73e8',
+        fontWeight: '500',
+        padding: 8,
     },
 });
-
-export default ContestSchedule;

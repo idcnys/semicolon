@@ -1,10 +1,10 @@
+import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import { BackHandler } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import { ROOT_FOLDERS } from '../constants/drive';
+import { FOLDER_PREFS_KEY } from '../constants/storage';
 import { fetchDriveContents } from '../scripts/driveApi';
 import { DriveItem, RootFolder } from '../types/drive';
-import { FOLDER_PREFS_KEY } from '../constants/storage';
 
 export const useFolderNavigation = () => {
     const [folderStack, setFolderStack] = useState<string[]>([]);

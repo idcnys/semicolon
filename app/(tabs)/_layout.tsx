@@ -18,7 +18,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="contest"
         options={{
           title: 'CP Cal',
           tabBarIcon: ({ focused }) => (
@@ -31,7 +31,7 @@ export default function TabLayout() {
       />
       
       <Tabs.Screen
-        name="folder"
+        name="index"
         options={{
           title: 'Resources',
           tabBarIcon: ({ focused }) => (

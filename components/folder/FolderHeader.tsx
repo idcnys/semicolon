@@ -1,12 +1,12 @@
 import { ChevronRight, Home } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import {
+    Image,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
-    Image
+    View
 } from 'react-native';
 
 import { useBookmarks } from '../../hooks/useBookmarks';

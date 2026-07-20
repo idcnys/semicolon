@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BookmarkItem as BookmarkItemType, useBookmarks } from '../../hooks/useBookmarks';
+import { getFileType } from '../../scripts/fileHelpers';
 import { BookmarkEmptyState } from './BookmarkEmptyState';
 import { BookmarkItem } from './BookmarkItem';
 import { PreviewModal } from './PreviewModal';
-import { BookmarkItem as BookmarkItemType, useBookmarks } from '../../hooks/useBookmarks';
-import { getFileType } from '../../scripts/fileHelpers';
 
 interface Props {
     onClose?: () => void;

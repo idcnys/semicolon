@@ -4,6 +4,7 @@ import {
     ActivityIndicator,
     Animated,
     FlatList,
+    RefreshControl,
     StatusBar,
     StyleSheet,
     Text,
@@ -144,9 +145,7 @@ export default function NotesScreen() {
 
     const filteredTodos = getFilteredTodos();
 
-    if (isLoading) {
-        return <TodoLoadingSkeleton />;
-    }
+    // Keep header visible during reloads; show loading state only for the list content
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -172,23 +171,27 @@ export default function NotesScreen() {
                         <Text style={styles.savingText}>Saving...</Text>
                     </View>
                 )}
-
-                <FlatList
-                    data={filteredTodos}
-                    renderItem={({ item }) => (
-                        <TodoItem
-                            item={item}
-                            onToggle={toggleTodo}
-                            onDelete={deleteTodo}
-                            fadeAnim={fadeAnim}
-                            slideAnim={slideAnim}
-                        />
-                    )}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={styles.todosList}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={<TodoEmptyState filterType={filterType} />}
-                />
+                {isLoading ? (
+                    <TodoLoadingSkeleton />
+                ) : (
+                    <FlatList
+                        data={filteredTodos}
+                        renderItem={({ item }) => (
+                            <TodoItem
+                                item={item}
+                                onToggle={toggleTodo}
+                                onDelete={deleteTodo}
+                                fadeAnim={fadeAnim}
+                                slideAnim={slideAnim}
+                            />
+                        )}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={styles.todosList}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={<TodoEmptyState filterType={filterType} />}
+                        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={loadTodosOnMount} tintColor="#2563EB" colors={["#2563EB"]} />}
+                    />
+                )}
             </View>
 
             <TodoForm
