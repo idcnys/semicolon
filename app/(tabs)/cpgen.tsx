@@ -7,7 +7,6 @@ import {
     KeyboardAvoidingView,
     Modal,
     Platform,
-    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -23,7 +22,6 @@ import { useCoverGenerator } from '../../hooks/useCoverGenerator';
 
 const PROFILE_STORAGE_KEY = 'cover_page_user_profile';
 
-// Map roll ranges to sections
 const getSectionFromRoll = (roll: string): string => {
     const rollStr = roll.toString().padStart(7, '0');
     const lastThree = parseInt(rollStr.slice(-3));
@@ -135,22 +133,19 @@ export default function CoverPageGenerator() {
             <StatusBar style="dark" />
             
             <View style={styles.header}>
-                <View style={styles.headerLeft}>
+                <TouchableOpacity style={styles.headerLeft} activeOpacity={0.7}>
                     <View style={styles.headerIconContainer}>
-                        <BookOpen size={22} color="#007AFF" />
+                        <BookOpen size={20} color="#007AFF" />
                     </View>
-                    <View>
-                        <Text style={styles.title}>Cover Page</Text>
-                        <Text style={styles.subtitle}>Faster • Offline • Secure</Text>
-                    </View>
-                </View>
+                    <Text style={styles.title}>Cover Page</Text>
+                </TouchableOpacity>
                 
                 <TouchableOpacity 
                     style={styles.profileButton}
                     onPress={() => setShowProfileModal(true)}
                     activeOpacity={0.7}
                 >
-                    <User size={20} color="#007AFF" />
+                    <User size={18} color="#007AFF" />
                     {savedProfile && <View style={styles.profileDot} />}
                 </TouchableOpacity>
             </View>
@@ -181,113 +176,112 @@ export default function CoverPageGenerator() {
                 onGeneratePDF={handleGeneratePDF}
             />
 
-            {/* Native Profile Modal */}
             <Modal
                 visible={showProfileModal}
-                transparent
+                transparent={false}
                 animationType="slide"
                 onRequestClose={() => setShowProfileModal(false)}
             >
-                <KeyboardAvoidingView 
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.modalContainer}
-                >
-                    <Pressable 
-                        style={styles.modalBackdrop} 
-                        onPress={() => setShowProfileModal(false)}
-                    />
-                    
-                    <View style={styles.modalContent}>
+                <SafeAreaView style={styles.modalContainer} edges={['top']}>
+                    <KeyboardAvoidingView 
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.keyboardView}
+                    >
                         <View style={styles.modalHeader}>
                             <TouchableOpacity 
                                 onPress={() => setShowProfileModal(false)}
                                 style={styles.modalCloseButton}
                             >
-                                <X size={24} color="#007AFF" />
+                                <X size={22} color="#8E8E93" />
                             </TouchableOpacity>
                             <Text style={styles.modalTitle}>Profile</Text>
                             <View style={styles.modalPlaceholder} />
                         </View>
 
-                        {savedProfile && (
-                            <View style={styles.savedProfileCard}>
-                                <View style={styles.savedProfileRow}>
-                                    <Text style={styles.savedProfileLabel}>Active Profile</Text>
-                                    <TouchableOpacity 
-                                        onPress={handleClearProfile}
-                                        style={styles.clearButton}
-                                    >
-                                        <Text style={styles.clearButtonText}>Clear</Text>
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.savedProfileInfo}>
-                                    <View style={styles.savedProfileItem}>
-                                        <Text style={styles.savedProfileKey}>Name</Text>
-                                        <Text style={styles.savedProfileValue}>{savedProfile.name}</Text>
+                        <ScrollView 
+                            style={styles.modalScroll}
+                            contentContainerStyle={styles.modalScrollContent}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {savedProfile && (
+                                <View style={styles.savedProfileCard}>
+                                    <View style={styles.savedProfileHeader}>
+                                        <Text style={styles.savedProfileTitle}>Active Profile</Text>
+                                        <TouchableOpacity 
+                                            onPress={handleClearProfile}
+                                        >
+                                            <Text style={styles.clearButtonText}>Clear</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                    <View style={styles.savedProfileItem}>
-                                        <Text style={styles.savedProfileKey}>Roll</Text>
-                                        <Text style={styles.savedProfileValue}>{savedProfile.roll}</Text>
-                                    </View>
-                                    <View style={styles.savedProfileItem}>
-                                        <Text style={styles.savedProfileKey}>Section</Text>
-                                        <View style={styles.sectionChip}>
-                                            <Text style={styles.sectionChipText}>
-                                                {getSectionFromRoll(savedProfile.roll)}
-                                            </Text>
+                                    <View style={styles.savedProfileInfo}>
+                                        <View style={styles.savedProfileItem}>
+                                            <Text style={styles.savedProfileKey}>Name</Text>
+                                            <Text style={styles.savedProfileValue}>{savedProfile.name}</Text>
+                                        </View>
+                                        <View style={styles.savedProfileItem}>
+                                            <Text style={styles.savedProfileKey}>Roll</Text>
+                                            <Text style={styles.savedProfileValue}>{savedProfile.roll}</Text>
+                                        </View>
+                                        <View style={styles.savedProfileItem}>
+                                            <Text style={styles.savedProfileKey}>Section</Text>
+                                            <View style={styles.sectionChip}>
+                                                <Text style={styles.sectionChipText}>
+                                                    {getSectionFromRoll(savedProfile.roll)}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
                                 </View>
-                            </View>
-                        )}
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Full Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profileData.name}
-                                onChangeText={(text) => setProfileData({ ...profileData, name: text })}
-                                placeholder="Enter your full name"
-                                placeholderTextColor="#C7C7CC"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Roll Number</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={profileData.roll}
-                                onChangeText={(text) => {
-                                    const numericText = text.replace(/[^0-9]/g, '');
-                                    setProfileData({ ...profileData, roll: numericText });
-                                }}
-                                placeholder="Enter 7-digit roll"
-                                placeholderTextColor="#C7C7CC"
-                                keyboardType="numeric"
-                                maxLength={7}
-                            />
-                            {profileData.roll && /^\d{7}$/.test(profileData.roll) && (
-                                <View style={styles.sectionPreview}>
-                                    <Text style={styles.sectionPreviewText}>
-                                        Section <Text style={styles.sectionPreviewHighlight}>
-                                            {getSectionFromRoll(profileData.roll)}
-                                        </Text>
-                                    </Text>
-                                </View>
                             )}
-                        </View>
 
-                        <TouchableOpacity 
-                            style={styles.saveButton}
-                            onPress={handleSaveProfile}
-                            activeOpacity={0.8}
-                        >
-                            <Text style={styles.saveButtonText}>
-                                {savedProfile ? 'Update Profile' : 'Save Profile'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </KeyboardAvoidingView>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel}>Full Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={profileData.name}
+                                    onChangeText={(text) => setProfileData({ ...profileData, name: text })}
+                                    placeholder="Enter your name"
+                                    placeholderTextColor="#B0B0B0"
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel}>Roll Number</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={profileData.roll}
+                                    onChangeText={(text) => {
+                                        const numericText = text.replace(/[^0-9]/g, '');
+                                        setProfileData({ ...profileData, roll: numericText });
+                                    }}
+                                    placeholder="Enter 7-digit roll"
+                                    placeholderTextColor="#B0B0B0"
+                                    keyboardType="numeric"
+                                    maxLength={7}
+                                />
+                                {profileData.roll && /^\d{7}$/.test(profileData.roll) && (
+                                    <View style={styles.sectionPreview}>
+                                        <Text style={styles.sectionPreviewText}>
+                                            Section <Text style={styles.sectionPreviewHighlight}>
+                                                {getSectionFromRoll(profileData.roll)}
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+
+                            <TouchableOpacity 
+                                style={styles.saveButton}
+                                onPress={handleSaveProfile}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.saveButtonText}>
+                                    {savedProfile ? 'Update Profile' : 'Save Profile'}
+                                </Text>
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </KeyboardAvoidingView>
+                </SafeAreaView>
             </Modal>
         </SafeAreaView>
     );
@@ -296,15 +290,15 @@ export default function CoverPageGenerator() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#F5F5F5',
     },
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#F5F5F5',
     },
     scrollContent: {
         paddingHorizontal: 16,
-        paddingBottom: 30,
+        paddingBottom: 20,
     },
     header: {
         flexDirection: 'row',
@@ -312,124 +306,118 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#F5F5F5',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: '#E8E8E8',
     },
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-        flex: 1,
+        gap: 10,
     },
     headerIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: '#E8F0FE',
+        width: 36,
+        height: 36,
+        borderRadius: 8,
+        backgroundColor: '#F0F0F0',
         alignItems: 'center',
         justifyContent: 'center',
     },
     title: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#1C1C1E',
+        fontSize: 18,
+        fontWeight: '500',
+        color: '#1A1A1A',
         letterSpacing: -0.3,
     },
-    subtitle: {
-        fontSize: 11,
-        color: '#8E8E93',
-        fontWeight: '400',
-        marginTop: 1,
-        letterSpacing: 0.3,
-    },
     profileButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#E8F0FE',
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#F0F0F0',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
     },
     profileDot: {
         position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#34C759',
-        borderWidth: 2,
-        borderColor: '#F2F2F7',
+        top: 7,
+        right: 7,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#4CAF50',
+        borderWidth: 1.5,
+        borderColor: '#F5F5F5',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#F5F5F5',
     },
     loadingText: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#8E8E93',
     },
     modalContainer: {
         flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        backgroundColor: '#F5F5F5',
     },
-    modalBackdrop: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
-    modalContent: {
-        backgroundColor: '#FFFFFF',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingHorizontal: 20,
-        paddingTop: 8,
-        paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-        maxHeight: '80%',
+    keyboardView: {
+        flex: 1,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        backgroundColor: '#F5F5F5',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
-    },
-    modalCloseButton: {
-        padding: 4,
+        borderBottomColor: '#E8E8E8',
     },
     modalTitle: {
         fontSize: 17,
-        fontWeight: '600',
-        color: '#1C1C1E',
+        fontWeight: '500',
+        color: '#1A1A1A',
+        letterSpacing: -0.3,
+    },
+    modalCloseButton: {
+        padding: 6,
     },
     modalPlaceholder: {
-        width: 32,
+        width: 34,
+    },
+    modalScroll: {
+        flex: 1,
+    },
+    modalScrollContent: {
+        paddingHorizontal: 20,
+        paddingTop: 24,
+        paddingBottom: 30,
     },
     savedProfileCard: {
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#FFFFFF',
         borderRadius: 12,
         padding: 16,
-        marginTop: 16,
-        marginBottom: 16,
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 3,
+        elevation: 1,
     },
-    savedProfileRow: {
+    savedProfileHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 12,
     },
-    savedProfileLabel: {
+    savedProfileTitle: {
         fontSize: 13,
-        fontWeight: '600',
-        color: '#1C1C1E',
+        fontWeight: '500',
+        color: '#8E8E93',
+        letterSpacing: 0.2,
     },
     savedProfileInfo: {
         gap: 8,
@@ -438,6 +426,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        paddingVertical: 4,
     },
     savedProfileKey: {
         fontSize: 14,
@@ -445,79 +434,83 @@ const styles = StyleSheet.create({
     },
     savedProfileValue: {
         fontSize: 14,
-        color: '#1C1C1E',
+        color: '#1A1A1A',
         fontWeight: '500',
     },
     sectionChip: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#F0F0F0',
         paddingHorizontal: 12,
         paddingVertical: 2,
         borderRadius: 12,
     },
     sectionChipText: {
-        color: '#FFFFFF',
+        color: '#1A1A1A',
         fontSize: 13,
-        fontWeight: '600',
-    },
-    clearButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        backgroundColor: '#FF3B30',
-        borderRadius: 6,
+        fontWeight: '500',
     },
     clearButtonText: {
-        fontSize: 12,
-        color: '#FFFFFF',
-        fontWeight: '600',
+        fontSize: 13,
+        color: '#FF6B6B',
+        fontWeight: '500',
     },
     inputGroup: {
-        marginBottom: 16,
+        marginBottom: 20,
     },
     inputLabel: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '500',
-        color: '#1C1C1E',
+        color: '#1A1A1A',
         marginBottom: 6,
+        letterSpacing: 0.2,
     },
     input: {
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#FFFFFF',
         borderRadius: 10,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        fontSize: 16,
-        color: '#1C1C1E',
-        minHeight: 44,
+        fontSize: 15,
+        color: '#1A1A1A',
         borderWidth: 1,
-        borderColor: '#E5E5EA',
+        borderColor: '#E8E8E8',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.02,
+        shadowRadius: 2,
+        elevation: 0,
     },
     sectionPreview: {
         marginTop: 8,
-        paddingVertical: 6,
+        paddingVertical: 5,
         paddingHorizontal: 12,
-        backgroundColor: '#E8F0FE',
+        backgroundColor: '#F0F7FF',
         borderRadius: 8,
         alignSelf: 'flex-start',
     },
     sectionPreviewText: {
         fontSize: 13,
-        color: '#1C1C1E',
+        color: '#1A1A1A',
     },
     sectionPreviewHighlight: {
-        fontWeight: '700',
-        color: '#007AFF',
-        fontSize: 15,
+        fontWeight: '600',
+        color: '#0066CC',
+        fontSize: 14,
     },
     saveButton: {
-        backgroundColor: '#007AFF',
-        borderRadius: 12,
-        paddingVertical: 16,
+        backgroundColor: '#0066CC',
+        borderRadius: 10,
+        paddingVertical: 14,
         alignItems: 'center',
         marginTop: 8,
-        marginBottom: 4,
+        shadowColor: '#0066CC',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     saveButtonText: {
         color: '#FFFFFF',
-        fontSize: 17,
-        fontWeight: '600',
+        fontSize: 16,
+        fontWeight: '500',
+        letterSpacing: 0.3,
     },
 });

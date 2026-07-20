@@ -171,7 +171,7 @@ export default function NotesScreen() {
                         <Text style={styles.savingText}>Saving...</Text>
                     </View>
                 )}
-                {isLoading ? (
+                {isLoading && todos.length === 0 ? (
                     <TodoLoadingSkeleton />
                 ) : (
                     <FlatList
