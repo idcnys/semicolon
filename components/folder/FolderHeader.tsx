@@ -9,6 +9,8 @@ import {
     Image
 } from 'react-native';
 
+import { useBookmarks } from '../../hooks/useBookmarks';
+
 
 interface Props {
     title: string;
@@ -16,6 +18,9 @@ interface Props {
     folderNames: Record<string, string>;
     onBreadcrumbPress: (index: number) => void;
         onOpenBookmarks?: () => void;
+    onToggleEdit?: () => void;
+    editMode?: boolean;
+    showEditButton?: boolean;
 }
 
 export const FolderHeader: React.FC<Props> = ({ 
@@ -23,9 +28,15 @@ export const FolderHeader: React.FC<Props> = ({
     folderStack, 
     folderNames, 
     onBreadcrumbPress,
-    onOpenBookmarks
+    onOpenBookmarks,
+    onToggleEdit,
+    editMode
+    , showEditButton = true
 }) => {
     const breadcrumbScrollViewRef = useRef<ScrollView>(null);
+    const { bookmarks } = useBookmarks();
+    const bookmarkCount = bookmarks ? bookmarks.length : 0;
+    const displayTitle = title ? (title.split(' ')[0] + (title.includes(' ') ? '...' : '')) : '';
 
     useEffect(() => {
         breadcrumbScrollViewRef.current?.scrollToEnd({ animated: true });
@@ -35,17 +46,29 @@ export const FolderHeader: React.FC<Props> = ({
         <View style={styles.header}>
             <View style={styles.topRow}>
                 <Text style={styles.title} numberOfLines={1}>
-                    {title}
+                    {displayTitle}
                 </Text>
-                <TouchableOpacity
-                    onPress={() => onOpenBookmarks && onOpenBookmarks()}
-                    style={styles.bookmarkButton}
-                >
-                    <Image
-                        source={require('../../assets/icons/bookmark.png')}
-                        style={styles.bookmarkIcon}
-                    />
-                </TouchableOpacity>
+                <View style={styles.headerActionsRow}>
+                    {onToggleEdit && showEditButton && (
+                        <TouchableOpacity onPress={() => onToggleEdit && onToggleEdit()} style={styles.editButton}>
+                            <Text style={styles.editButtonText}>{editMode ? 'Save' : 'Edit'}</Text>
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                        onPress={() => onOpenBookmarks && onOpenBookmarks()}
+                        style={styles.bookmarkButton}
+                    >
+                        <Image
+                            source={require('../../assets/icons/bookmark.png')}
+                            style={styles.bookmarkIcon}
+                        />
+                        {bookmarkCount > 0 && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{bookmarkCount}</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView
@@ -109,6 +132,38 @@ const styles = StyleSheet.create({
         height: 22,
         resizeMode: 'contain',
         tintColor: '#1a73e8'
+    },
+    headerActionsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    editButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: '#f1f3f4',
+    },
+    editButtonText: {
+        color: '#1a73e8',
+        fontWeight: '600'
+    },
+    badge: {
+        position: 'absolute',
+        top: -6,
+        right: -6,
+        minWidth: 18,
+        height: 18,
+        paddingHorizontal: 4,
+        borderRadius: 9,
+        backgroundColor: '#FF3B30',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: '700',
     },
     breadcrumbContainer: { 
         alignItems: 'center', 

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { BackHandler } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { ROOT_FOLDERS } from '../constants/drive';
 import { fetchDriveContents } from '../scripts/driveApi';
 import { DriveItem, RootFolder } from '../types/drive';
+import { FOLDER_PREFS_KEY } from '../constants/storage';
 
 export const useFolderNavigation = () => {
     const [folderStack, setFolderStack] = useState<string[]>([]);
@@ -22,13 +24,34 @@ export const useFolderNavigation = () => {
             try {
                 setRootFoldersLoading(true);
                 const folders = await ROOT_FOLDERS();
-                setRootFolders(folders);
-                
+
+                // Load saved prefs (order + pinned)
+                const prefsRaw = await SecureStore.getItemAsync(FOLDER_PREFS_KEY);
+                let prefs: { order?: string[]; pinned?: string[] } | null = null;
+                if (prefsRaw) {
+                    try { prefs = JSON.parse(prefsRaw); } catch (e) { prefs = null; }
+                }
+
+                let ordered = folders.slice();
+                if (prefs && prefs.order && prefs.order.length > 0) {
+                    // Reorder according to prefs.order, keep unknowns appended
+                    const byId = Object.fromEntries(folders.map(f => [f.id, f]));
+                    ordered = prefs.order.map(id => byId[id]).filter(Boolean) as RootFolder[];
+                    const remaining = folders.filter(f => !prefs!.order!.includes(f.id));
+                    ordered = [...ordered, ...remaining];
+                }
+
+                // Apply pinned flag
+                const pinnedSet = new Set(prefs && prefs.pinned ? prefs.pinned : []);
+                const merged = ordered.map(f => ({ ...f, pinned: pinnedSet.has(f.id) } as any));
+
+                setRootFolders(merged as RootFolder[] & any);
+
                 // Initialize folder names with root folders
                 const initialMap: Record<string, string> = {};
                 folders.forEach(f => { initialMap[f.id] = f.name; });
                 setFolderNames(initialMap);
-                
+
                 setRootFoldersError(null);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to load root folders';
@@ -108,13 +131,31 @@ export const useFolderNavigation = () => {
         try {
             setRootFoldersLoading(true);
             const folders = await ROOT_FOLDERS();
-            setRootFolders(folders);
-            
+
+            // Load prefs and reapply order/pins similarly to initialize
+            const prefsRaw = await SecureStore.getItemAsync(FOLDER_PREFS_KEY);
+            let prefs: { order?: string[]; pinned?: string[] } | null = null;
+            if (prefsRaw) {
+                try { prefs = JSON.parse(prefsRaw); } catch (e) { prefs = null; }
+            }
+
+            let ordered = folders.slice();
+            if (prefs && prefs.order && prefs.order.length > 0) {
+                const byId = Object.fromEntries(folders.map(f => [f.id, f]));
+                ordered = prefs.order.map(id => byId[id]).filter(Boolean) as RootFolder[];
+                const remaining = folders.filter(f => !prefs!.order!.includes(f.id));
+                ordered = [...ordered, ...remaining];
+            }
+            const pinnedSet = new Set(prefs && prefs.pinned ? prefs.pinned : []);
+            const merged = ordered.map(f => ({ ...f, pinned: pinnedSet.has(f.id) } as any));
+
+            setRootFolders(merged as RootFolder[] & any);
+
             // Update folder names with fresh data
             const updatedMap: Record<string, string> = {};
             folders.forEach(f => { updatedMap[f.id] = f.name; });
             setFolderNames(prev => ({ ...prev, ...updatedMap }));
-            
+
             setRootFoldersError(null);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to load root folders';
@@ -123,6 +164,39 @@ export const useFolderNavigation = () => {
         } finally {
             setRootFoldersLoading(false);
         }
+    };
+
+    const persistPrefs = async (foldersList: RootFolder[] & any) => {
+        try {
+            const order = foldersList.map(f => f.id);
+            const pinned = foldersList.filter((f:any) => f.pinned).map((f:any) => f.id);
+            await SecureStore.setItemAsync(FOLDER_PREFS_KEY, JSON.stringify({ order, pinned }));
+        } catch (e) {
+            console.error('Failed to persist folder prefs', e);
+        }
+    };
+
+    const reorderRootFolders = async (fromIndex: number, toIndex: number) => {
+        setRootFolders(prev => {
+            const next = prev.slice();
+            const [moved] = next.splice(fromIndex, 1);
+            next.splice(toIndex, 0, moved);
+            persistPrefs(next);
+            return next;
+        });
+    };
+
+    const togglePin = async (folderId: string) => {
+        setRootFolders(prev => {
+            const next = prev.map(f => f.id === folderId ? { ...f, pinned: !((f as any).pinned) } : f);
+            // Move pinned folders to front, preserving order among pinned
+            next.sort((a:any,b:any) => {
+                if (a.pinned === b.pinned) return 0;
+                return a.pinned ? -1 : 1;
+            });
+            persistPrefs(next);
+            return next;
+        });
     };
 
     const refresh = () => {
@@ -159,6 +233,9 @@ export const useFolderNavigation = () => {
         setError,
         refresh,
         refreshRootFolders,
-        getRootFolders
+        getRootFolders,
+        reorderRootFolders,
+        togglePin,
+        persistFolderPrefs: persistPrefs
     };
 };

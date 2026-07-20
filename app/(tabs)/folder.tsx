@@ -41,12 +41,28 @@ export default function FolderScreen() {
         navigateToRoot,
         navigateToBreadcrumb,
         refresh,
-        refreshRootFolders
+        refreshRootFolders,
+        reorderRootFolders,
+        togglePin,
+        persistFolderPrefs
     } = useFolderNavigation();
 
     const { toggleBookmark, isBookmarked } = useBookmarks();
 
     const [bookmarksVisible, setBookmarksVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+
+    const toggleEdit = async () => {
+        if (editMode) {
+            // saving
+            try {
+                await persistFolderPrefs(rootFolders as any);
+            } catch (e) {
+                console.error('Failed to persist on save', e);
+            }
+        }
+        setEditMode(prev => !prev);
+    };
 
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewItem, setPreviewItem] = useState<DriveItem | null>(null);
@@ -119,17 +135,24 @@ export default function FolderScreen() {
                     folderNames={folderNames}
                     onBreadcrumbPress={navigateToBreadcrumb}
                     onOpenBookmarks={() => setBookmarksVisible(true)}
+                    onToggleEdit={toggleEdit}
+                    editMode={editMode}
+                    showEditButton={folderStack.length === 0}
                 />
 
                 {folderStack.length === 0 ? (
                     <ScrollView contentContainerStyle={styles.dashboardContainer}>
                         <Text style={styles.sectionTitle}>Select a Directory</Text>
                         <View style={styles.cardGrid}>
-                            {rootFolders.map((folder) => (
+                            {rootFolders.map((folder, idx) => (
                                 <FolderCard
                                     key={folder.id}
-                                    folder={folder}
+                                    folder={folder as any}
                                     onPress={() => navigateToRoot(folder.id)}
+                                    editMode={editMode}
+                                    onMoveUp={idx > 0 ? () => reorderRootFolders(idx, idx - 1) : undefined}
+                                    onMoveDown={idx < rootFolders.length - 1 ? () => reorderRootFolders(idx, idx + 1) : undefined}
+                                    onPinToggle={(id) => togglePin(id)}
                                 />
                             ))}
                         </View>

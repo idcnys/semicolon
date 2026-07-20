@@ -41,6 +41,15 @@ const ContestSchedule: React.FC = () => {
             .filter(group => group.contests.length > 0);
     }, [groupedContests, platformFilter]);
 
+    const getCount = (p: string) => {
+        if (!contestCount) return 0;
+        if (p === 'All') return contestCount.total || 0;
+        if (p === 'Codeforces') return contestCount.codeforces || 0;
+        if (p === 'AtCoder') return contestCount.atcoder || 0;
+        if (p === 'CodeChef') return contestCount.codechef || 0;
+        return 0;
+    };
+
     const renderItem = ({ item }: { item: GroupedContests }) => (
         <View style={styles.groupContainer}>
             <DateHeader date={item.date} count={item.count} />
@@ -62,13 +71,6 @@ const ContestSchedule: React.FC = () => {
                     <Text style={styles.title}>Upcoming Contests</Text>
                 </View>
                 <View style={styles.headerRight}>
-                    {contestCount && contestCount.total > 0 && (
-                        <View style={styles.countBadge}>
-                            <Text style={styles.countText}>
-                                {contestCount.total}
-                            </Text>
-                        </View>
-                    )}
                     {usingFallback && (
                         <View style={styles.fallbackBadge}>
                             <AlertCircle size={14} color="#92400E" />
@@ -78,16 +80,28 @@ const ContestSchedule: React.FC = () => {
                 </View>
             </View>
             <View style={styles.filterRow}>
-                {['All', 'Codeforces', 'AtCoder', 'CodeChef'].map((p) => (
+                {[
+                    { key: 'All', label: 'All' },
+                    { key: 'Codeforces', label: 'CF' },
+                    { key: 'AtCoder', label: 'AT' },
+                    { key: 'CodeChef', label: 'CC' },
+                ].map((p) => (
                     <TouchableOpacity
-                        key={p}
-                        onPress={() => setPlatformFilter(p as any)}
+                        key={p.key}
+                        onPress={() => setPlatformFilter(p.key as any)}
                         style={[
                             styles.filterButton,
-                            platformFilter === p && styles.filterButtonActive
+                            platformFilter === p.key && styles.filterButtonActive
                         ]}
                     >
-                        <Text style={[styles.filterText, platformFilter === p && styles.filterTextActive]}>{p}</Text>
+                        <View style={styles.filterInner}>
+                            <Text style={[styles.filterText, platformFilter === p.key && styles.filterTextActive]}>{p.label}</Text>
+                            {getCount(p.key) > 0 && (
+                                <View style={styles.smallBadge}>
+                                    <Text style={styles.smallBadgeText}>{getCount(p.key)}</Text>
+                                </View>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -99,25 +113,7 @@ const ContestSchedule: React.FC = () => {
                 </View>
             )}
 
-            {/* Platform stats */}
-            {contestCount && contestCount.total > 0 && (
-                <View style={styles.statsContainer}>
-                    <View style={styles.statsRow}>
-                        <View style={styles.statItem}>
-                            <View style={[styles.statDot, { backgroundColor: '#1F8ACB' }]} />
-                            <Text style={styles.statText}>Codeforces: {contestCount.codeforces}</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <View style={[styles.statDot, { backgroundColor: '#222222' }]} />
-                            <Text style={styles.statText}>AtCoder: {contestCount.atcoder}</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <View style={[styles.statDot, { backgroundColor: '#5B4638' }]} />
-                            <Text style={styles.statText}>CodeChef: {contestCount.codechef}</Text>
-                        </View>
-                    </View>
-                </View>
-            )}
+            {/* platform counts moved into filter buttons */}
             
             <FlatList
                 data={filteredContests}
@@ -203,33 +199,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginLeft: 4,
     },
-    statsContainer: {
-        backgroundColor: '#FFFFFF',
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        gap: 16,
-        flexWrap: 'wrap',
-    },
-    statItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    statDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    statText: {
-        fontSize: 12,
-        color: '#475569',
-        fontWeight: '500',
-    },
+    /* platform counts are shown in filter badges now */
     errorBanner: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -251,17 +221,17 @@ const styles = StyleSheet.create({
     },
     filterRow: {
         flexDirection: 'row',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
-        gap: 8,
+        gap: 6,
     },
     filterButton: {
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 999,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 20,
         backgroundColor: 'transparent',
         borderWidth: 1,
         borderColor: 'transparent',
@@ -271,12 +241,33 @@ const styles = StyleSheet.create({
         borderColor: '#BFDBFE',
     },
     filterText: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#475569',
         fontWeight: '600',
     },
     filterTextActive: {
         color: '#1D4ED8',
+    },
+    filterInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    smallBadge: {
+        backgroundColor: '#EFF6FF',
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#BFDBFE',
+        minWidth: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    smallBadgeText: {
+        color: '#1D4ED8',
+        fontSize: 11,
+        fontWeight: '700',
     },
     groupContainer: {
         marginBottom: 20,

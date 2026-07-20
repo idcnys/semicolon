@@ -11,11 +11,15 @@ import {
 import { RootFolder } from '../../types/drive';
 
 interface Props {
-    folder: RootFolder;
+    folder: RootFolder & { pinned?: boolean };
     onPress: (id: string) => void;
+    editMode?: boolean;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    onPinToggle?: (id: string) => void;
 }
 
-export const FolderCard: React.FC<Props> = ({ folder, onPress }) => {
+export const FolderCard: React.FC<Props> = ({ folder, onPress, editMode, onMoveUp, onMoveDown, onPinToggle }) => {
     const { width } = useWindowDimensions();
     const cardWidth = (width - 48) / 2;
 
@@ -30,6 +34,22 @@ export const FolderCard: React.FC<Props> = ({ folder, onPress }) => {
             </View>
             <Text style={styles.cardTitle} numberOfLines={2}>{folder.name}</Text>
             <Text style={styles.cardDescription} numberOfLines={2}>{folder.description}</Text>
+
+            {editMode && (
+                <View style={styles.editRow}>
+                    <View style={styles.moveButtons}>
+                        <TouchableOpacity onPress={onMoveUp} style={styles.moveBtn}>
+                            <Text style={styles.moveBtnText}>{'<'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={onMoveDown} style={styles.moveBtn}>
+                            <Text style={styles.moveBtnText}>{'>'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={() => onPinToggle && onPinToggle(folder.id)} style={styles.pinBtn}>
+                        <Text style={[styles.pinText, folder.pinned && styles.pinned]}>{folder.pinned ? 'Pinned' : 'Pin'}</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </TouchableOpacity>
     );
 };
@@ -61,4 +81,38 @@ const styles = StyleSheet.create({
         color: '#5f6368', 
         lineHeight: 16 
     },
+    editRow: {
+        marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    moveButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    moveBtn: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        backgroundColor: '#F1F3F4',
+        borderRadius: 6,
+    },
+    moveBtnText: {
+        fontSize: 14,
+        fontWeight: '700'
+    },
+    pinBtn: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        backgroundColor: 'transparent'
+    },
+    pinText: {
+        fontSize: 12,
+        color: '#475569'
+    },
+    pinned: {
+        color: '#1D4ED8',
+        fontWeight: '700'
+    }
 });
