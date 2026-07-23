@@ -3,12 +3,12 @@
 # Semicolon
 ### APK Sources 
 
-<a href="https://drive.google.com/uc?export=download&id=15VpHe2kHByPbEobMpoP7kDLoCs5F3U9Y">
-  <img src="https://img.shields.io/badge/Download_APK-From_Google_Drive-success?style=flat&logo=android" alt="Download APK">
+<a href="https://github.com/idcnys/semicolon/releases/download/apk_latest/semicolon_2.0.3.apk">
+  <img src="https://img.shields.io/badge/Download_APK-Github_Release_(2.0.3)-red?style=flat&logo=android" alt="Download APK">
 </a>
 /
 <a href="https://github.com/idcnys/semicolon/releases/download/apk-stable/semicolon-stable.apk">
-  <img src="https://img.shields.io/badge/Download_APK-From_Github_Release-blue?style=flat&logo=android" alt="Download APK">
+  <img src="https://img.shields.io/badge/Download_APK-Github_Release_(1.2.0)-blue?style=flat&logo=android" alt="Download APK">
 </a>
 
 <br>
@@ -17,7 +17,7 @@
 
 ```Working on it.. It will be available soon```
 
-<b>Dev Version:</b> <code>1.2.12</code>• <b>Released Version:</b> <code>1.2.7</code> •  <b>APK Size:</b> <code>~90 MB</code>
+<b>Dev Version:</b> <code>2.0.3</code>• <b>Released Version:</b> <code>2.0.3</code> •  <b>APK Size:</b> <code>~90 MB</code>
 
 </div>
 
